@@ -1,3 +1,5 @@
+
+#Apartado del cliente
 from io import open
 
 def crear_archivo(archivo):
@@ -7,5 +9,8 @@ def crear_archivo(archivo):
             print("Archivo creado correctamente. ")
     except Exception as e:
         print(f"Error al crear el archivo {e}")
+
+def registrar_usuario():
+    
 
 
