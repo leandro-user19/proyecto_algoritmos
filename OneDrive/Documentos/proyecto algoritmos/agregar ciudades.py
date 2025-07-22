@@ -1,12 +1,16 @@
 from io import open
 
+CLAVE = "1234"  #Clave de administrador
+USUARIO = "ad.min@gmail.com"  #Usuario de administrador
+
+
 # Validar correo funcion
 def usuario_validar(correo):
     partes=correo.split("@")
     if len(partes)!=2:
         return False
     
-    usuario, dominio =partes
+    usuario,dominio=partes
 
     nombre_usuario=usuario.split(".")  #para el formato nombre.apellido del usuario
     if len(nombre_usuario)!=2:
@@ -27,40 +31,99 @@ def usuario_valido(nombre):
     return True
 
 def contraseña_segura(contraseña):
-    if( len(contraseña)>=6 and
+    if(len(contraseña)>=6 and
        any(c.isupper()for c in contraseña) and
        any(c.islower() for c in contraseña) and
        any(c.isdigit()for c in contraseña)):
         return True
     return False
 
-# Funcion inicio de sesion
-def inicio_sesion():
-    print("\nIniciar Sesion--")
-    usuario=input("Usuario: ")
-    contraseña=input("Constraseña: ")
+def validar_vacio(mensaje):
+    texto = input(mensaje)
+    if texto.strip():
+        return texto
+    else:
+        print("El campo no puede estar vacío. Por favor, ingrese un texto.")
+        
+def validar_edad(mensaje):
+    while True:
+        try:
+            edad = int(input(mensaje))
+            if edad >= 0:
+                return edad
+            else:
+                print("La edad debe ser de 0 años o más.")
+        except ValueError:
+            print("Por favor, ingrese un número válido para la edad.")
+
     
-    #Validacion del correo y contraseña antes de continuar
+def registrar_usuario(usuarios):
+    print("\n--Registro de Usuario--")
+    nombres = validar_vacio("Ingrese su nombre y apellido: ")
+    edad = validar_edad("Ingrese su edad: ")
+    usuario = input("Ingrese su usuario: ")
+    clave = input("Ingrese su contraseña: ")
+
     if not usuario_validar(usuario):
         print("Error. El formato debe de ser nombre.apellido@dominio.com")
         return False
     
-    if not contraseña_segura(contraseña):
+    if not contraseña_segura(clave):
         print("Error de contraseña")
         return False
     
+    for u in usuarios:
+        if u["usuario"] == usuario:
+            print("El usuario ya existe. Por favor, elija otro.")
+            return False
+        
+    usuarios.append({
+        "nombres": nombres,
+        "edad": edad,
+        "usuario": usuario,
+        "clave": clave
+    })
+    print("Cliente registrado exitosamente.")
+
+
+
+def guardar_datos(usuarios,archivo):
     try:
-        with open ("Usuarios.txt", "r", encoding="utf-8") as archivo:
-            contenido=archivo.read().split("-"*50)
+        with open(archivo, "w", encoding="utf-8") as file:
+            for usuario in usuarios:
+                file.write(f"Usuario: {usuario['usuario']}\n")
+                file.write(f"Contraseña: {usuario['clave']}\n")
+                file.write(f"Nombres: {usuario['nombres']}\n")
+                file.write(f"Edad: {usuario['edad']}\n")
+                file.write("-" * 50 + "\n")
+        print("Datos guardados exitosamente.")
+    except Exception as e:
+        print(f"Error al guardar los datos: {e}")
+
+def cargar_datos(archivo):
+    usuarios = []
+    try:
+        with open(archivo, "r", encoding="utf-8") as file:
+            contenido = file.read().split("-" * 50 + "\n")
             for bloque in contenido:
-                if f"Usuario: {usuario}" in bloque and f"Contraseña: {contraseña}" in bloque:
-                    print("Autentificacion exitosa")
-                    return True
-                print("Usuario o contraseña incorrectos")
-                return False
+                if bloque.strip():
+                    lineas = bloque.strip().split("\n")
+                    if len(lineas) >= 4:
+                        usuario = lineas[0].split(": ")[1]
+                        clave = lineas[1].split(": ")[1]
+                        nombres = lineas[2].split(": ")[1]
+                        edad = int(lineas[3].split(": ")[1])
+                        usuarios.append({
+                            "usuario": usuario,
+                            "clave": clave,
+                            "nombres": nombres,
+                            "edad": edad
+                        })
+        return usuarios
     except FileNotFoundError:
-        print("No hay usuarios registrados")
-        return False
+        print("No se encontró el archivo de usuarios.")
+        return []    
+
 
 
 # Agregar las nuevas ciudades/puntos turísticos , distancias y costos.
@@ -75,7 +138,7 @@ def agregar_datos_turisticos():
     lugar=input("Punto turistico: ")
     try:
         distancia=int(input("Distancia (en km): "))
-        costo=float(input("Costo de la entrada (en USD) : $"))
+        costo=float(input("Costo de la entrada (en USD): $"))
 
         punto={    #diccionario  para almacenar de una manera estructurada
             "ciudad":ciudad,
@@ -97,7 +160,7 @@ def mostrar_puntos_turisticos():
     for i, punto in enumerate(puntos_turisticos, start=1):
         print(f"{i}Ciudad: {punto["ciudad"]} | Lugar: {punto["lugar"]} | Distancia: {punto["distancia"]} km | Costo: ${punto["costo"]:.2f} ")
 
-def menu_turismo():
+def menu_turismo_admin():
     while True:
         print("\n-----Puntos Turisticos-----")
         print("1.Agregar datos turísticos")
@@ -115,22 +178,60 @@ def menu_turismo():
         else:
             print("Opcion no valida")
 
+def menu_turismo_cliente():
+    pass
+
+def menu_inicio_sesion():
+    print("1. Administrador")
+    print("2. Cliente")
+    print("3. Salir")
+
+def menu_cliente():
+    print("1. Iniciar sesión")
+    print("2. Registrarse")
+    print("3. Volver al menú principal")
+
+
+def iniciar_sesion_admin():
+    usuario = input("Ingrese su usuario: ")
+    clave = input("Ingrese su contraseña: ")
+
+    if usuario == USUARIO and clave == CLAVE:
+        print("\nBienvenido, administrador.")
+        menu_turismo_admin()
+    else:
+        print("Usuario o contraseña incorrectos. Intente nuevamente.")
+
+def iniciar_sesion_cliente(usuarios):
+    usuario = input("Ingrese su usuario: ")
+    clave = input("Ingrese su contraseña: ")
+    for u in usuarios:
+        if u["usuario"] == usuario and u["clave"] == clave:
+            print(f"\nBienvenido, {u['nombres']}.")
+            menu_turismo_cliente()
+    print("Usuario o contraseña incorrectos. Intente nuevamente.")
+
 def menu_principal():
+    archivo = "usuarios.txt"
+    usuarios = cargar_datos(archivo)
     while True:
         print("\nSISTEMA DE RUTAS TURÍSTICAS")
-        print("1.Iniciar sesión")
-        print("2.Salir")
-        opcion=input("Seleccione una opción: ")
-
-        if opcion=="1":
-            if inicio_sesion():
-                menu_turismo()
-
-        elif opcion=="2":
-            print("Saliendo del sistema...")
-            break
-
-        else:
-            print("Opcion no valida")
+        menu_inicio_sesion()
+        opcion_uno = input("Seleccione una opción: ")
+        if opcion_uno == '1':
+            iniciar_sesion_admin()
+        elif opcion_uno == '2':
+            menu_cliente()
+            opcion_dos = input("Seleccione una opción: ")
+            if opcion_dos == '1':
+                iniciar_sesion_cliente(usuarios)
+            elif opcion_dos == '2':
+                registrar_usuario(usuarios)
+                guardar_datos(usuarios,archivo)
+            elif opcion_dos == '3':
+                print("Volviendo al menú principal...")
+                break
+            else:
+                print("Opción no válida. Intente nuevamente.")
 
 menu_principal()
