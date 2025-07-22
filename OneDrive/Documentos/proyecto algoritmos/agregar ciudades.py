@@ -187,7 +187,6 @@ def menu_cliente():
     print("2. Registrarse")
     print("3. Volver al menú principal")
 
-
 def iniciar_sesion_admin():
     usuario = input("Ingrese su usuario: ")
     clave = input("Ingrese su contraseña: ")
