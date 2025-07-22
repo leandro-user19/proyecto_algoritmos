@@ -1,7 +1,7 @@
 from io import open
 
 CLAVE = "1234"  #Clave de administrador
-USUARIO = "ad.min@gmail.com"  #Usuario de administrador
+USUARIO = "admin"  #Usuario de administrador
 
 
 # Validar correo funcion
@@ -118,37 +118,52 @@ def cargar_datos(archivo):
                         })
         return usuarios
     except FileNotFoundError:
-        print("No se encontró el archivo de usuarios.")
         return []    
 
 
 # Agregar las nuevas ciudades/puntos turísticos , distancias y costos.
 
 #Almacenar ciudades/puntos turísticos , distancias y costos.
-puntos_turisticos=[]
+
 
 #funcion para agregar punto turistico
-def agregar_datos_turisticos():
-    print("Ingrese los siguientes datos ")
-    ciudad=input("Ciudad: ")
-    lugar=input("Punto turistico: ")
-    try:
-        distancia=int(input("Distancia (en km): "))
-        costo=float(input("Costo de la entrada (en USD): $"))
+def agregar_datos_turisticos(puntos_turisticos):
+    print("Ingrese los siguientes datos")
+    ciudad = validar_vacio("Ciudad: ")
+    lugar = validar_vacio("Lugar turístico: ")
+    while True:
+        try:
+            distancia=int(input("Distancia (en km): "))
+            costo=float(input("Costo de la entrada (en USD): $"))
+            if distancia < 0 or costo < 0:
+                print("La distancia y el costo deben ser valores positivos.")
+            break
+        except ValueError:
+            print("\nERROR: Ingrese un número valido para la distancia y el costo.")
 
-        punto={    #diccionario  para almacenar de una manera estructurada
-            "ciudad":ciudad,
-            "lugar":lugar,
-            "distancia":distancia,
-            "costo":costo
-        }
-        puntos_turisticos.append(punto)
-        print("Datos del punto turistico agregada correctamente\n")
-    except ValueError:
-        print("\nERROR: Ingrese un numero valido para la distancia y el costo.")
+    punto={
+        "ciudad":ciudad,
+        "lugar":lugar,
+        "distancia":distancia,
+        "costo":costo
+    }
+    puntos_turisticos.append(punto)
+    print("\nDatos del punto turistico agregada correctamente.")
+
+def consular_punto_turistico(puntos_turisticos):
+    if not puntos_turisticos:
+        print("\nAun no hay datos agregados")
+        return
+    ciudad = validar_vacio("Ingrese la ciudad que desea consultar: ")
+    for punto in puntos_turisticos:
+        if punto["ciudad"].lower() == ciudad.lower():
+            print(f"Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
+            return
+    print("No se encontraron puntos turísticos en esa ciudad.")
+
 
 # funcion para mostrar el punto ingresado
-def mostrar_puntos_turisticos():
+def mostrar_puntos_turisticos(puntos_turisticos):
     if not puntos_turisticos:
         print("Aun no hay datos agregados")
         return
@@ -156,20 +171,65 @@ def mostrar_puntos_turisticos():
     for i, punto in enumerate(puntos_turisticos, start=1):
         print(f"{i}Ciudad: {punto["ciudad"]} | Lugar: {punto["lugar"]} | Distancia: {punto["distancia"]} km | Costo: ${punto["costo"]:.2f} ")
 
+def guardar_puntos_turisticos(puntos_turisticos, archivo):
+    try:
+        with open(archivo, "w", encoding="utf-8") as file:
+            for punto in puntos_turisticos:
+                file.write(f"Ciudad: {punto['ciudad']}\n")
+                file.write(f"Lugar: {punto['lugar']}\n")
+                file.write(f"Distancia: {punto['distancia']} km\n")
+                file.write(f"Costo: ${punto['costo']:.2f}\n")
+                file.write("-" * 50 + "\n")
+        print("Puntos turísticos guardados exitosamente.")
+    except Exception as e:
+        print(f"Error al guardar los puntos turísticos: {e}")
+
+def cargar_puntos_turisticos(archivo):
+    puntos_turisticos = []
+    try:
+        with open(archivo, "r", encoding="utf-8") as file:
+            contenido = file.read().split("-" * 50 + "\n")
+            for bloque in contenido:
+                if bloque.strip():
+                    lineas = bloque.strip().split("\n")
+                    if len(lineas) >= 4:
+                        ciudad = lineas[0].split(": ")[1]
+                        lugar = lineas[1].split(": ")[1]
+                        distancia = int(lineas[2].split(": ")[1].replace(" km", ""))
+                        costo = float(lineas[3].split(": ")[1].replace("$", ""))
+                        puntos_turisticos.append({
+                            "ciudad": ciudad,
+                            "lugar": lugar,
+                            "distancia": distancia,
+                            "costo": costo
+                        })
+        return puntos_turisticos
+    except FileNotFoundError:
+        return []
+    
 def menu_turismo_admin():
+    archivo = "rutas.txt"
+    puntos_turisticos = cargar_puntos_turisticos(archivo)
     while True:
         print("\n-----Puntos Turisticos-----")
-        print("1.Agregar datos turísticos")
-        print("2.Mostrar puntos turisticos")
-        print("3.Volver")
-        opcion2=input("Seleccione una opción: ")
+        print("1. Agregar datos turísticos")
+        #print("2.Mostrar puntos turisticos")
+        print("2. Listar puntos turísticos")
+        print("3. Consultar puntos turísticos")
+        print("4. Actualizar puntos turísticos")
+        print("5. Eliminar puntos turísticos")
+        print("6. Volver al menú principal")
+        opcion=input("Seleccione una opción: ")
 
-        if opcion2=="1":
-            agregar_datos_turisticos()
-        elif opcion2=="2":
-            mostrar_puntos_turisticos()
-        elif opcion2=="3":
-            print("Volviendo al menú de registro...")
+        if opcion=="1":
+            agregar_datos_turisticos(puntos_turisticos)
+            guardar_puntos_turisticos(puntos_turisticos, archivo)
+        elif opcion=="2":
+            pass
+        elif opcion=="3":
+            consular_punto_turistico(puntos_turisticos)
+        elif opcion=="6":
+            print("\nVolviendo al menú principal...")
             break
         else:
             print("Opcion no valida")
@@ -178,11 +238,13 @@ def menu_turismo_cliente():
     pass
 
 def menu_inicio_sesion():
+    print("\n--- Menú de Inicio de Sesión ---")
     print("1. Administrador")
     print("2. Cliente")
     print("3. Salir")
 
 def menu_cliente():
+    print("\n--- Menú Cliente ---")
     print("1. Iniciar sesión")
     print("2. Registrarse")
     print("3. Volver al menú principal")
@@ -224,9 +286,12 @@ def menu_principal():
                 registrar_usuario(usuarios)
                 guardar_datos(usuarios,archivo)
             elif opcion_dos == '3':
-                print("Volviendo al menú principal...")
-                break
+                print("\nVolviendo al menú principal...")
+                continue
             else:
                 print("Opción no válida. Intente nuevamente.")
+        elif opcion_uno == '3':
+            print("Saliendo del sistema...")
+            break
 
 menu_principal()
