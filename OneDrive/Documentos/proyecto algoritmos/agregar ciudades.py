@@ -83,6 +83,7 @@ def registrar_usuario(usuarios):
         "clave": clave
     })
     print("Cliente registrado exitosamente.")
+    return True
 
 def guardar_datos(usuarios,archivo):
     try:
@@ -121,8 +122,6 @@ def cargar_datos(archivo):
         return []    
 
 
-# Agregar las nuevas ciudades/puntos turísticos , distancias y costos.
-
 #Almacenar ciudades/puntos turísticos , distancias y costos.
 
 
@@ -150,7 +149,7 @@ def agregar_datos_turisticos(puntos_turisticos):
     puntos_turisticos.append(punto)
     print("\nDatos del punto turistico agregada correctamente.")
 
-def consular_punto_turistico(puntos_turisticos):
+def consultar_punto_turistico(puntos_turisticos):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
         return
@@ -161,15 +160,64 @@ def consular_punto_turistico(puntos_turisticos):
             return
     print("No se encontraron puntos turísticos en esa ciudad.")
 
+def actualizar_punto_turistico(puntos_turisticos):
+    if not puntos_turisticos:
+        print("\nAun no hay datos agregados")
+        return
+    print("\nPuntos turísticos disponibles:")
+    for i, punto in enumerate(puntos_turisticos):
+        print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
+    while True:
+        try:
+            indice_actualizar = int(input("Ingrese el número del punto turístico que desea actualizar: ")) - 1
+            if 0 <= indice_actualizar < len(puntos_turisticos):
+                ciudad = validar_vacio("Nueva ciudad: ")
+                lugar = validar_vacio("Nuevo lugar turístico: ")
+                while True:
+                    try:
+                        distancia = int(input("Nueva distancia (en km): "))
+                        costo = float(input("Nuevo costo de la entrada (en USD): $"))
+                        if distancia < 0 or costo < 0:
+                            print("La distancia y el costo deben ser valores positivos.")
+                        break
+                    except ValueError:
+                        print("\nERROR: Ingrese un número valido para la distancia y el costo.")
+                puntos_turisticos[indice_actualizar] = {
+                    "ciudad": ciudad,
+                    "lugar": lugar,
+                    "distancia": distancia,
+                    "costo": costo
+                }
+                print(f"Punto turístico actualizado exitosamente.")
+                return
+            else:
+                print("Número de índice inválido. Por favor, intente de nuevo.")
+        except ValueError:
+            print("Entrada inválida. Por favor, ingrese un número.")
+
+def eliminar_punto_turistico(puntos_turisticos):
+    if not puntos_turisticos:
+        print("\nAún no hay datos agregados.")
+        return
+
+    print("\nPuntos turísticos disponibles:")
+    for i, punto in enumerate(puntos_turisticos):
+        print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
+
+    while True:
+        try:
+            indice_eliminar = int(input("Ingrese el número del punto turístico que desea eliminar: ")) - 1
+            if 0 <= indice_eliminar < len(puntos_turisticos):
+                punto_eliminado = puntos_turisticos.pop(indice_eliminar)
+                print(f"Punto turístico '{punto_eliminado['lugar']}' de {punto_eliminado['ciudad']} eliminado exitosamente.")
+                return
+            else:
+                print("Número de índice inválido. Por favor, intente de nuevo.")
+        except ValueError:
+            print("Entrada inválida. Por favor, ingrese un número.")
+
 
 # funcion para mostrar el punto ingresado
-def mostrar_puntos_turisticos(puntos_turisticos):
-    if not puntos_turisticos:
-        print("Aun no hay datos agregados")
-        return
-    print("Lista de puntos Turisticos:")
-    for i, punto in enumerate(puntos_turisticos, start=1):
-        print(f"{i}Ciudad: {punto["ciudad"]} | Lugar: {punto["lugar"]} | Distancia: {punto["distancia"]} km | Costo: ${punto["costo"]:.2f} ")
 
 def guardar_puntos_turisticos(puntos_turisticos, archivo):
     try:
@@ -180,7 +228,6 @@ def guardar_puntos_turisticos(puntos_turisticos, archivo):
                 file.write(f"Distancia: {punto['distancia']} km\n")
                 file.write(f"Costo: ${punto['costo']:.2f}\n")
                 file.write("-" * 50 + "\n")
-        print("Puntos turísticos guardados exitosamente.")
     except Exception as e:
         print(f"Error al guardar los puntos turísticos: {e}")
 
@@ -213,7 +260,6 @@ def menu_turismo_admin():
     while True:
         print("\n-----Puntos Turisticos-----")
         print("1. Agregar datos turísticos")
-        #print("2.Mostrar puntos turisticos")
         print("2. Listar puntos turísticos")
         print("3. Consultar puntos turísticos")
         print("4. Actualizar puntos turísticos")
@@ -227,15 +273,21 @@ def menu_turismo_admin():
         elif opcion=="2":
             pass
         elif opcion=="3":
-            consular_punto_turistico(puntos_turisticos)
+            consultar_punto_turistico(puntos_turisticos)
+        elif opcion=="4":
+            actualizar_punto_turistico(puntos_turisticos)
+            guardar_puntos_turisticos(puntos_turisticos, archivo)
+        elif opcion=="5":
+            eliminar_punto_turistico(puntos_turisticos)
+            guardar_puntos_turisticos(puntos_turisticos, archivo)
         elif opcion=="6":
             print("\nVolviendo al menú principal...")
             break
         else:
-            print("Opcion no valida")
+            print("Opción no válida.")
 
 def menu_turismo_cliente():
-    pass
+    print("¡Acceso al menú de cliente!")
 
 def menu_inicio_sesion():
     print("\n--- Menú de Inicio de Sesión ---")
@@ -262,11 +314,17 @@ def iniciar_sesion_admin():
 def iniciar_sesion_cliente(usuarios):
     usuario = input("Ingrese su usuario: ")
     clave = input("Ingrese su contraseña: ")
+    login_exitoso = False
+
     for u in usuarios:
         if u["usuario"] == usuario and u["clave"] == clave:
             print(f"\nBienvenido, {u['nombres']}.")
-            menu_turismo_cliente()
-    print("Usuario o contraseña incorrectos. Intente nuevamente.")
+            menu_turismo_cliente() 
+            login_exitoso = True
+            break
+    if not login_exitoso:
+        print("Usuario o contraseña incorrectos. Intente nuevamente o regístrese.")
+
 
 def menu_principal():
     archivo = "usuarios.txt"
