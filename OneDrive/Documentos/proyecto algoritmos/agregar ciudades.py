@@ -55,8 +55,7 @@ def validar_edad(mensaje):
                 print("La edad debe ser de 0 años o más.")
         except ValueError:
             print("Por favor, ingrese un número válido para la edad.")
-
-    
+ 
 def registrar_usuario(usuarios):
     print("\n--Registro de Usuario--")
     nombres = validar_vacio("Ingrese su nombre y apellido: ")
@@ -84,8 +83,6 @@ def registrar_usuario(usuarios):
         "clave": clave
     })
     print("Cliente registrado exitosamente.")
-
-
 
 def guardar_datos(usuarios,archivo):
     try:
@@ -123,7 +120,6 @@ def cargar_datos(archivo):
     except FileNotFoundError:
         print("No se encontró el archivo de usuarios.")
         return []    
-
 
 
 # Agregar las nuevas ciudades/puntos turísticos , distancias y costos.
