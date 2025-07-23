@@ -121,7 +121,6 @@ def cargar_datos(archivo):
     except FileNotFoundError:
         return []    
 
-
 #funcion para agregar punto turistico
 def agregar_datos_turisticos(puntos_turisticos):
     print("Ingrese los siguientes datos")
