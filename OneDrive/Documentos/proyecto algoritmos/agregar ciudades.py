@@ -214,7 +214,7 @@ def actualizar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_actualizar = int(input("Ingrese el número del punto turístico que desea actualizar: ")) - 1
-            if 0 <= indice_actualizar < len(puntos_turisticos):
+            if 0 <= indice_actualizar.strip() < len(puntos_turisticos):
                 ciudad = validar_vacio("Nueva ciudad: ")
                 lugar = validar_vacio("Nuevo lugar turístico: ")
                 while True:
@@ -227,10 +227,10 @@ def actualizar_punto_turistico(puntos_turisticos):
                     except ValueError:
                         print("\nERROR: Ingrese un número valido para la distancia y el costo.")
                 puntos_turisticos[indice_actualizar] = {
-                    "ciudad": ciudad,
-                    "lugar": lugar,
-                    "distancia": distancia,
-                    "costo": costo
+                    "ciudad": ciudad.strip(),
+                    "lugar": lugar.strip(),
+                    "distancia": distancia.strip(),
+                    "costo": costo.strip()
                 }
                 print(f"Punto turístico actualizado exitosamente.")
                 return
@@ -251,7 +251,7 @@ def eliminar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_eliminar = int(input("Ingrese el número del punto turístico que desea eliminar: ")) - 1
-            if 0 <= indice_eliminar < len(puntos_turisticos):
+            if 0 <= indice_eliminar.strip() < len(puntos_turisticos):
                 punto_eliminado = puntos_turisticos.pop(indice_eliminar)
                 print(f"Punto turístico '{punto_eliminado['lugar']}' de {punto_eliminado['ciudad']} eliminado exitosamente.")
                 return
