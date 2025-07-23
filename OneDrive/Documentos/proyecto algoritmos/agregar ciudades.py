@@ -39,10 +39,10 @@ def contraseña_segura(contraseña):
     return False
 
 def validar_vacio(mensaje):
-    texto = input(mensaje)
-    if texto.strip():
-        return texto
-    else:
+    while True:
+        texto = input(mensaje)
+        if texto.strip():
+            return texto
         print("El campo no puede estar vacío. Por favor, ingrese un texto.")
         
 def validar_edad(mensaje):
@@ -60,8 +60,8 @@ def registrar_usuario(usuarios):
     print("\n--Registro de Usuario--")
     nombres = validar_vacio("Ingrese su nombre y apellido: ")
     edad = validar_edad("Ingrese su edad: ")
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
 
     if not usuario_validar(usuario):
         print("Error. El formato debe de ser nombre.apellido@dominio.com")
@@ -77,10 +77,10 @@ def registrar_usuario(usuarios):
             return False
         
     usuarios.append({
-        "nombres": nombres,
-        "edad": edad,
-        "usuario": usuario,
-        "clave": clave
+        "nombres": nombres.strip(),
+        "edad": edad.strip(),
+        "usuario": usuario.strip(),
+        "clave": clave.strip()
     })
     print("Cliente registrado exitosamente.")
     return True
@@ -122,9 +122,6 @@ def cargar_datos(archivo):
         return []    
 
 
-#Almacenar ciudades/puntos turísticos , distancias y costos.
-
-
 #funcion para agregar punto turistico
 def agregar_datos_turisticos(puntos_turisticos):
     print("Ingrese los siguientes datos")
@@ -141,10 +138,10 @@ def agregar_datos_turisticos(puntos_turisticos):
             print("\nERROR: Ingrese un número valido para la distancia y el costo.")
 
     punto={
-        "ciudad":ciudad,
-        "lugar":lugar,
-        "distancia":distancia,
-        "costo":costo
+        "ciudad":ciudad.strip(),
+        "lugar":lugar.strip(),
+        "distancia":distancia.strip(),
+        "costo":costo.strip()
     }
     puntos_turisticos.append(punto)
     print("\nDatos del punto turistico agregada correctamente.")
@@ -196,7 +193,6 @@ def listar_puntos_turisticos(puntos_turisticos):
         print("Opción no válida. Por favor, intente nuevamente.")
         return
     
-
 def consultar_punto_turistico(puntos_turisticos):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
@@ -263,9 +259,6 @@ def eliminar_punto_turistico(puntos_turisticos):
                 print("Número de índice inválido. Por favor, intente de nuevo.")
         except ValueError:
             print("Entrada inválida. Por favor, ingrese un número.")
-
-
-# funcion para mostrar el punto ingresado
 
 def guardar_puntos_turisticos(puntos_turisticos, archivo):
     try:
@@ -350,29 +343,28 @@ def menu_cliente():
     print("3. Volver al menú principal")
 
 def iniciar_sesion_admin():
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
 
-    if usuario == USUARIO and clave == CLAVE:
+    if usuario.strip() == USUARIO and clave.strip() == CLAVE:
         print("\nBienvenido, administrador.")
         menu_turismo_admin()
     else:
         print("Usuario o contraseña incorrectos. Intente nuevamente.")
 
 def iniciar_sesion_cliente(usuarios):
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
     login_exitoso = False
 
     for u in usuarios:
-        if u["usuario"] == usuario and u["clave"] == clave:
+        if u["usuario"] == usuario.strip() and u["clave"] == clave.strip():
             print(f"\nBienvenido, {u['nombres']}.")
             menu_turismo_cliente() 
             login_exitoso = True
             break
     if not login_exitoso:
         print("Usuario o contraseña incorrectos. Intente nuevamente o regístrese.")
-
 
 def menu_principal():
     archivo = "usuarios.txt"
