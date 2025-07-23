@@ -3,7 +3,6 @@ from io import open
 CLAVE = "1234"  #Clave de administrador
 USUARIO = "admin"  #Usuario de administrador
 
-
 # Validar correo funcion
 def usuario_validar(correo):
     partes=correo.split("@")
