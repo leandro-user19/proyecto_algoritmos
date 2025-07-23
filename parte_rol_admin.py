@@ -53,6 +53,4 @@ def eliminar_rutas(punto):
     except ValueError:
         print("Ingrese un número o caracter valido porfavor")
 
-
-            
             
