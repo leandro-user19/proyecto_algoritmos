@@ -78,7 +78,7 @@ def registrar_usuario(usuarios):
         
     usuarios.append({
         "nombres": nombres.strip(),
-        "edad": edad.strip(),
+        "edad": edad,
         "usuario": usuario.strip(),
         "clave": clave.strip()
     })
@@ -139,58 +139,58 @@ def agregar_datos_turisticos(puntos_turisticos):
     punto={
         "ciudad":ciudad.strip(),
         "lugar":lugar.strip(),
-        "distancia":distancia.strip(),
-        "costo":costo.strip()
+        "distancia":distancia,
+        "costo":costo
     }
     puntos_turisticos.append(punto)
     print("\nDatos del punto turistico agregada correctamente.")
+
+def mostrar_puntos_turisticos(puntos_turisticos,mensaje):
+    print(f"\n--- {mensaje} ---")
+    for i, punto in enumerate(puntos_turisticos):
+        print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
 
 def listar_puntos_turisticos(puntos_turisticos):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
         return
     
-    print("\n--- Elija como desea ordenar los puntos turísticos ---")
-    print("1. Alfabéticamente por ciudad (A-Z)")
-    print("2. Alfabéticamente por ciudad (Z-A)")
-    print("3. Por distancia (menor a mayor)")
-    print("4. Por distancia (mayor a menor)")
-    print("5. Por costo (menor a mayor)")
-    print("6. Por costo (mayor a menor)")
-    opcion = input("Seleccione una opción: ")
-    if opcion == "1":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower())
-        print("\nPuntos turísticos ordenados alfabéticamente por ciudad (A-Z):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    elif opcion == "2":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower(), reverse=True)
-        print("\nPuntos turísticos ordenados alfabéticamente por ciudad (Z-A):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    elif opcion == "3":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'])
-        print("\nPuntos turísticos ordenados por distancia (menor a mayor):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    elif opcion == "4":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'], reverse=True)
-        print("\nPuntos turísticos ordenados por distancia (mayor a menor):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    elif opcion == "5":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'])
-        print("\nPuntos turísticos ordenados por costo (menor a mayor):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    elif opcion == "6":
-        puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'], reverse=True)
-        print("\nPuntos turísticos ordenados por costo (mayor a menor):")
-        for i, punto in enumerate(puntos_turisticos_ordenados):
-            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-    else:
-        print("Opción no válida. Por favor, intente nuevamente.")
-        return
+    while True:
+        print("\n--- Elija como desea ordenar los puntos turísticos ---")
+        print("1. Alfabéticamente por ciudad (A-Z)")
+        print("2. Alfabéticamente por ciudad (Z-A)")
+        print("3. Por distancia (menor a mayor)")
+        print("4. Por distancia (mayor a menor)")
+        print("5. Por costo (menor a mayor)")
+        print("6. Por costo (mayor a menor)")
+        opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower())
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (A-Z)")
+            break
+        elif opcion == "2":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower(), reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (Z-A)")
+            break
+        elif opcion == "3":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'])
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (menor a mayor)")
+            break
+        elif opcion == "4":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'], reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (mayor a menor)")
+            break
+        elif opcion == "5":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'])
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (menor a mayor)")
+            break
+        elif opcion == "6":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'], reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (mayor a menor)")
+            break
+        else:
+            print("Opción no válida. Por favor, intente nuevamente.")
+            continue
     
 def consultar_punto_turistico(puntos_turisticos):
     if not puntos_turisticos:
