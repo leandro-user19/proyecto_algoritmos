@@ -1,9 +1,11 @@
 from io import open
+import heapq
+from collections import deque
 
 CLAVE = "1234"  #Clave de administrador
 USUARIO = "admin"  #Usuario de administrador
 
-# Validar usuario funcion
+# registrar usuario
 def usuario_validar(usuario):
     partes=usuario.split("@")
     if len(partes)!=2:
@@ -88,6 +90,7 @@ def guardar_datos(usuarios,archivo):
     try:
         with open(archivo, "w", encoding="utf-8") as file:
             for usuario in usuarios:
+                file.write("-" * 50 + "\n")
                 file.write(f"Usuario: {usuario['usuario']}\n")
                 file.write(f"Contraseña: {usuario['clave']}\n")
                 file.write(f"Nombres: {usuario['nombres']}\n")
@@ -118,9 +121,11 @@ def cargar_datos(archivo):
                         })
         return usuarios
     except FileNotFoundError:
-        return []    
+        return []
+    except Exception as e:
+        return []
 
-#funcion para agregar punto turistico
+#rol administrador
 def agregar_datos_turisticos(puntos_turisticos):
     print("Ingrese los siguientes datos")
     ciudad = validar_vacio("Ciudad: ")
@@ -144,11 +149,6 @@ def agregar_datos_turisticos(puntos_turisticos):
     puntos_turisticos.append(punto)
     print("\nDatos del punto turistico agregada correctamente.")
 
-def mostrar_puntos_turisticos(puntos_turisticos,mensaje):
-    print(f"\n--- {mensaje} ---")
-    for i, punto in enumerate(puntos_turisticos):
-        print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
-
 def listar_puntos_turisticos(puntos_turisticos):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
@@ -163,33 +163,26 @@ def listar_puntos_turisticos(puntos_turisticos):
         print("5. Por costo (menor a mayor)")
         print("6. Por costo (mayor a menor)")
         opcion = input("Seleccione una opción: ")
+        puntos_turisticos_ordenados = list(puntos_turisticos)  # Copia para ordenar sin modificar la original
         if opcion == "1":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower())
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (A-Z)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['ciudad'].lower())
         elif opcion == "2":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower(), reverse=True)
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (Z-A)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['ciudad'].lower(), reverse=True)
         elif opcion == "3":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'])
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (menor a mayor)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['distancia'])
         elif opcion == "4":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'], reverse=True)
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (mayor a menor)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['distancia'], reverse=True)
         elif opcion == "5":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'])
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (menor a mayor)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['costo'])
         elif opcion == "6":
-            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'], reverse=True)
-            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (mayor a menor)")
-            break
+            puntos_turisticos_ordenados.sort(key=lambda x: x['costo'], reverse=True)
         else:
             print("Opción no válida. Por favor, intente nuevamente.")
             continue
+        
+        for i, punto in enumerate(puntos_turisticos_ordenados):
+            print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
+        break
     
 def consultar_punto_turistico(puntos_turisticos):
     if not puntos_turisticos:
@@ -262,6 +255,7 @@ def guardar_puntos_turisticos(puntos_turisticos, archivo):
     try:
         with open(archivo, "w", encoding="utf-8") as file:
             for punto in puntos_turisticos:
+                file.write("-" * 50 + "\n")
                 file.write(f"Ciudad: {punto['ciudad']}\n")
                 file.write(f"Lugar: {punto['lugar']}\n")
                 file.write(f"Distancia: {punto['distancia']} km\n")
@@ -291,6 +285,8 @@ def cargar_puntos_turisticos(archivo):
                         })
         return puntos_turisticos
     except FileNotFoundError:
+        return []
+    except Exception as e:
         return []
     
 def menu_turismo_admin():
@@ -325,9 +321,237 @@ def menu_turismo_admin():
         else:
             print("Opción no válida.")
 
-def menu_turismo_cliente():
-    print("¡Acceso al menú de cliente!")
+#rol cliente
+def dijkstra(grafo, inicio, destino=None):
+    distancias = {nodo: float('inf') for nodo in grafo}
+    distancias[inicio] = 0
+    padres = {nodo: None for nodo in grafo}  
+    cola_prioridad = [(0, inicio)]
 
+    while cola_prioridad:
+        distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
+        if distancia_actual > distancias[nodo_actual]:
+            continue
+        if destino and nodo_actual == destino:
+            break
+        for vecino, distancia_vecino in grafo[nodo_actual].items():
+            nueva_distancia = distancia_actual + distancia_vecino
+            if nueva_distancia < distancias[vecino]:
+                distancias[vecino] = nueva_distancia
+                padres[vecino] = nodo_actual
+                heapq.heappush(cola_prioridad, (nueva_distancia, vecino))
+
+    def reconstruir_camino(hasta_nodo):
+        camino = []
+        actual = hasta_nodo
+        while actual is not None:
+            camino.append(actual)
+            actual = padres[actual]
+        return camino[::-1]
+
+    if destino:
+        if distancias[destino] == float('inf'):
+            return None, float('inf')
+        camino = reconstruir_camino(destino)
+        return camino, distancias[destino]
+    else:
+        todos_los_caminos = {}
+        for nodo in grafo:
+            if distancias[nodo] != float('inf'):
+                todos_los_caminos[nodo] = {
+                    'distancia': distancias[nodo],
+                    'camino': reconstruir_camino(nodo)
+                }
+        return todos_los_caminos
+
+def bfs(grafo, inicio):
+    visitados = []
+    cola = deque([inicio])
+    orden_visita = []
+
+    while cola:
+        nodo_actual = cola.popleft()
+        if nodo_actual not in visitados:
+            visitados.append(nodo_actual)
+            orden_visita.append(nodo_actual)
+            for vecino in grafo[nodo_actual]:
+                if vecino not in visitados and vecino not in cola:
+                    cola.append(vecino)
+    return orden_visita
+
+def dfs(grafo,inicio):
+    visitados = []
+    pila = [inicio]
+    orden_visita = []
+    while pila:
+        nodo_actual = pila.pop()
+        if nodo_actual not in visitados:
+            visitados.append(nodo_actual)
+            orden_visita.append(nodo_actual)
+            for vecino in grafo[nodo_actual]:
+                if vecino not in visitados:
+                    pila.append(vecino)
+    return orden_visita
+
+def cargar_grafo(archivo):
+    grafo = {}
+    try:
+        with open(archivo, "r", encoding="utf-8") as file:
+            contenido = file.read().split("-" * 50 + "\n")
+            for bloque in contenido:
+                if bloque.strip():
+                    lineas = bloque.strip().split("\n")
+                    if len(lineas) >= 4:
+                        ciudad = lineas[0].split(": ")[1]
+                        lugar = lineas[1].split(": ")[1]
+                        distancia = int(lineas[2].split(": ")[1].replace(" km", ""))
+                        costo = float(lineas[3].split(": ")[1].replace("$", ""))
+                        grafo.setdefault(ciudad, {})[lugar] = (distancia,costo)
+        return grafo
+    except FileNotFoundError:
+        return {}
+
+def mostrar_rutas_conectadas(grafo):
+    if not grafo:
+        print("No hay rutas conectadas.")
+        return
+
+    print("\n--- Rutas conectadas ---")
+    for ciudad, destinos in grafo.items():
+        destinos_str = ", ".join([f"{lugar} ({distancia} km, ${costo:.2f})" for lugar, (distancia, costo) in destinos.items()])
+        print(f"{ciudad}: {destinos_str}")
+
+def consultar_ruta_optima(grafo):
+    if not grafo:
+        print("No hay rutas conectadas.")
+        return
+
+    ciudad_origen = validar_vacio("Ingrese la ciudad de origen: ")
+    ciudad_destino = validar_vacio("Ingrese la ciudad de destino: ")
+
+    if ciudad_origen not in grafo or ciudad_destino not in grafo:
+        print("Una o ambas ciudades no están disponibles en el sistema.")
+        return
+
+    camino, distancia, costo = dijkstra(grafo, ciudad_origen, ciudad_destino)
+    if camino is None:
+        print(f"No hay ruta disponible desde {ciudad_origen} hasta {ciudad_destino}.")
+    else:
+        print(f"Ruta óptima desde {ciudad_origen} hasta {ciudad_destino}: {' -> '.join(camino)} con una distancia total de {distancia} km y un costo total de ${costo:.2f}.")
+
+def listar_ruta_cliente(ruta_cliente):
+    if not ruta_cliente:
+        print("\nAún no has seleccionado puntos turísticos para tu ruta.")
+        return
+    print("\n--- Tu Ruta de Viaje y Costo Total ---")
+    total_costo_entradas = sum(punto['costo'] for punto in ruta_cliente)
+    while True:
+        print("\nElija cómo desea ordenar los puntos de su ruta:")
+        print("1. Alfabéticamente (A-Z)")
+        print("2. Alfabéticamente (Z-A)")
+        print("3. Por costo (menor a mayor)")
+        print("4. Por costo (mayor a menor)")
+        print("5. Mantener orden de selección")
+        opcion = input("Seleccione una opción: ")
+
+        ruta_ordenada = list(ruta_cliente) # Copia para ordenar sin modificar la original
+        if opcion == "1":
+            ruta_ordenada.sort(key=lambda x: x['lugar'].lower())
+        elif opcion == "2":
+            ruta_ordenada.sort(key=lambda x: x['lugar'].lower(), reverse=True)
+        elif opcion == "3":
+            ruta_ordenada.sort(key=lambda x: x['costo'])
+        elif opcion == "4":
+            ruta_ordenada.sort(key=lambda x: x['costo'], reverse=True)
+        elif opcion == "5":
+            pass
+        else:
+            print("Opción no válida. Por favor, intente nuevamente.")
+            continue
+        
+        for i, punto in enumerate(ruta_ordenada):
+            print(f"{i + 1}. Lugar: {punto['lugar']} | Costo: ${punto['costo']:.2f}")
+        
+        print(f"\nCosto total de entradas para tu ruta: ${total_costo_entradas:.2f}")
+        break
+
+def guardar_ruta_cliente(ruta_cliente, nombre_usuario):
+    archivo = f"{nombre_usuario}_ruta.txt"
+    try:
+        with open(archivo, "w", encoding="utf-8") as file:
+            file.write(f"Ruta seleccionada por el cliente: {nombre_usuario}\n")
+            file.write("-" * 50 + "\n")
+            total_costo = 0.0
+            for i, punto in enumerate(ruta_cliente):
+                file.write(f"{i+1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Costo: ${punto['costo']:.2f}\n")
+                total_costo += punto['costo']
+            file.write("-" * 50 + "\n")
+            file.write(f"Costo total estimado de entradas: ${total_costo:.2f}\n")
+        print(f"Ruta guardada exitosamente en {archivo}.")
+    except Exception as e:
+        print(f"Error al guardar la ruta: {e}")
+
+def cargar_ruta_cliente(archivo):
+    ruta_cliente = []
+    try:
+        with open(archivo, "r", encoding="utf-8") as file:
+            contenido = file.read().split("-" * 50 + "\n")
+            for bloque in contenido:
+                if bloque.strip():
+                    lineas = bloque.strip().split("\n")
+                    for linea in lineas[1:]:
+                        if linea.strip():
+                            partes = linea.split("|")
+                            ciudad = partes[0].split(": ")[1].strip()
+                            lugar = partes[1].split(": ")[1].strip()
+                            costo = float(partes[2].split("$")[1].strip())
+                            ruta_cliente.append({"ciudad": ciudad,"lugar": lugar, "costo": costo})
+        return ruta_cliente
+    except FileNotFoundError:
+        return []
+    except Exception as e:
+        return []
+
+def menu_turismo_cliente(nombre_usuario):
+    grafo = cargar_grafo("rutas.txt")
+    archivo_cliente = f"{nombre_usuario}_ruta.txt"
+    ruta_cliente = cargar_ruta_cliente(archivo_cliente)
+    while True:
+        print(f"\n----- Menú de Viajero (Bienvenido, {nombre_usuario}) -----")
+        print("1. Ver mapa de lugares turísticos conectados")
+        print("2. Consultar ruta óptima entre dos lugares (Dijkstra)")
+        print("3. Explorar lugares (BFS/DFS)")
+        print("4. Seleccionar lugares para tu ruta de viaje")
+        print("5. Listar tu ruta seleccionada y costo total")
+        print("6. Actualizar lugares en tu ruta")
+        print("7. Eliminar lugares de tu ruta")
+        print("9. Volver al menú de inicio de sesión")
+        
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            mostrar_rutas_conectadas(grafo)
+        elif opcion == "2":
+            consultar_ruta_optima(grafo)
+        elif opcion == "3":
+            pass
+        elif opcion == "4":
+            pass
+        elif opcion == "5":
+            listar_ruta_cliente(ruta_cliente)
+        elif opcion == "6":
+            pass
+        elif opcion == "7":
+            pass
+        elif opcion == "8":
+            print("\nVolviendo al menú de inicio de sesión...")
+            break
+        else:
+            print("Opción no válida. Por favor, intente nuevamente.")
+
+
+
+#inicio de sesión
 def menu_inicio_sesion():
     print("\n--- Menú de Inicio de Sesión ---")
     print("1. Administrador")
@@ -358,7 +582,7 @@ def iniciar_sesion_cliente(usuarios):
     for u in usuarios:
         if u["usuario"] == usuario.strip() and u["clave"] == clave.strip():
             print(f"\nBienvenido, {u['nombres']}.")
-            menu_turismo_cliente() 
+            menu_turismo_cliente([u['nombres']]) 
             login_exitoso = True
             break
     if not login_exitoso:
