@@ -3,10 +3,9 @@ from io import open
 CLAVE = "1234"  #Clave de administrador
 USUARIO = "admin"  #Usuario de administrador
 
-
-# Validar correo funcion
-def usuario_validar(correo):
-    partes=correo.split("@")
+# Validar usuario funcion
+def usuario_validar(usuario):
+    partes=usuario.split("@")
     if len(partes)!=2:
         return False
     
@@ -39,10 +38,10 @@ def contraseña_segura(contraseña):
     return False
 
 def validar_vacio(mensaje):
-    texto = input(mensaje)
-    if texto.strip():
-        return texto
-    else:
+    while True:
+        texto = input(mensaje)
+        if texto.strip():
+            return texto
         print("El campo no puede estar vacío. Por favor, ingrese un texto.")
         
 def validar_edad(mensaje):
@@ -60,8 +59,8 @@ def registrar_usuario(usuarios):
     print("\n--Registro de Usuario--")
     nombres = validar_vacio("Ingrese su nombre y apellido: ")
     edad = validar_edad("Ingrese su edad: ")
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
 
     if not usuario_validar(usuario):
         print("Error. El formato debe de ser nombre.apellido@dominio.com")
@@ -77,10 +76,10 @@ def registrar_usuario(usuarios):
             return False
         
     usuarios.append({
-        "nombres": nombres,
+        "nombres": nombres.strip(),
         "edad": edad,
-        "usuario": usuario,
-        "clave": clave
+        "usuario": usuario.strip(),
+        "clave": clave.strip()
     })
     print("Cliente registrado exitosamente.")
     return True
@@ -121,10 +120,6 @@ def cargar_datos(archivo):
     except FileNotFoundError:
         return []    
 
-
-#Almacenar ciudades/puntos turísticos , distancias y costos.
-
-
 #funcion para agregar punto turistico
 def agregar_datos_turisticos(puntos_turisticos):
     print("Ingrese los siguientes datos")
@@ -141,14 +136,61 @@ def agregar_datos_turisticos(puntos_turisticos):
             print("\nERROR: Ingrese un número valido para la distancia y el costo.")
 
     punto={
-        "ciudad":ciudad,
-        "lugar":lugar,
+        "ciudad":ciudad.strip(),
+        "lugar":lugar.strip(),
         "distancia":distancia,
         "costo":costo
     }
     puntos_turisticos.append(punto)
     print("\nDatos del punto turistico agregada correctamente.")
 
+def mostrar_puntos_turisticos(puntos_turisticos,mensaje):
+    print(f"\n--- {mensaje} ---")
+    for i, punto in enumerate(puntos_turisticos):
+        print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar: {punto['lugar']} | Distancia: {punto['distancia']} km | Costo: ${punto['costo']:.2f}")
+
+def listar_puntos_turisticos(puntos_turisticos):
+    if not puntos_turisticos:
+        print("\nAun no hay datos agregados")
+        return
+    
+    while True:
+        print("\n--- Elija como desea ordenar los puntos turísticos ---")
+        print("1. Alfabéticamente por ciudad (A-Z)")
+        print("2. Alfabéticamente por ciudad (Z-A)")
+        print("3. Por distancia (menor a mayor)")
+        print("4. Por distancia (mayor a menor)")
+        print("5. Por costo (menor a mayor)")
+        print("6. Por costo (mayor a menor)")
+        opcion = input("Seleccione una opción: ")
+        if opcion == "1":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower())
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (A-Z)")
+            break
+        elif opcion == "2":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['ciudad'].lower(), reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados alfabéticamente por ciudad (Z-A)")
+            break
+        elif opcion == "3":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'])
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (menor a mayor)")
+            break
+        elif opcion == "4":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['distancia'], reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por distancia (mayor a menor)")
+            break
+        elif opcion == "5":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'])
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (menor a mayor)")
+            break
+        elif opcion == "6":
+            puntos_turisticos_ordenados = sorted(puntos_turisticos, key=lambda x: x['costo'], reverse=True)
+            mostrar_puntos_turisticos(puntos_turisticos_ordenados, "Puntos turísticos ordenados por costo (mayor a menor)")
+            break
+        else:
+            print("Opción no válida. Por favor, intente nuevamente.")
+            continue
+    
 def consultar_punto_turistico(puntos_turisticos):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
@@ -170,7 +212,7 @@ def actualizar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_actualizar = int(input("Ingrese el número del punto turístico que desea actualizar: ")) - 1
-            if 0 <= indice_actualizar < len(puntos_turisticos):
+            if 0 <= indice_actualizar.strip() < len(puntos_turisticos):
                 ciudad = validar_vacio("Nueva ciudad: ")
                 lugar = validar_vacio("Nuevo lugar turístico: ")
                 while True:
@@ -183,10 +225,10 @@ def actualizar_punto_turistico(puntos_turisticos):
                     except ValueError:
                         print("\nERROR: Ingrese un número valido para la distancia y el costo.")
                 puntos_turisticos[indice_actualizar] = {
-                    "ciudad": ciudad,
-                    "lugar": lugar,
-                    "distancia": distancia,
-                    "costo": costo
+                    "ciudad": ciudad.strip(),
+                    "lugar": lugar.strip(),
+                    "distancia": distancia.strip(),
+                    "costo": costo.strip()
                 }
                 print(f"Punto turístico actualizado exitosamente.")
                 return
@@ -207,7 +249,7 @@ def eliminar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_eliminar = int(input("Ingrese el número del punto turístico que desea eliminar: ")) - 1
-            if 0 <= indice_eliminar < len(puntos_turisticos):
+            if 0 <= indice_eliminar.strip() < len(puntos_turisticos):
                 punto_eliminado = puntos_turisticos.pop(indice_eliminar)
                 print(f"Punto turístico '{punto_eliminado['lugar']}' de {punto_eliminado['ciudad']} eliminado exitosamente.")
                 return
@@ -215,9 +257,6 @@ def eliminar_punto_turistico(puntos_turisticos):
                 print("Número de índice inválido. Por favor, intente de nuevo.")
         except ValueError:
             print("Entrada inválida. Por favor, ingrese un número.")
-
-
-# funcion para mostrar el punto ingresado
 
 def guardar_puntos_turisticos(puntos_turisticos, archivo):
     try:
@@ -271,7 +310,7 @@ def menu_turismo_admin():
             agregar_datos_turisticos(puntos_turisticos)
             guardar_puntos_turisticos(puntos_turisticos, archivo)
         elif opcion=="2":
-            pass
+            listar_puntos_turisticos(puntos_turisticos)
         elif opcion=="3":
             consultar_punto_turistico(puntos_turisticos)
         elif opcion=="4":
@@ -302,29 +341,28 @@ def menu_cliente():
     print("3. Volver al menú principal")
 
 def iniciar_sesion_admin():
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
 
-    if usuario == USUARIO and clave == CLAVE:
+    if usuario.strip() == USUARIO and clave.strip() == CLAVE:
         print("\nBienvenido, administrador.")
         menu_turismo_admin()
     else:
         print("Usuario o contraseña incorrectos. Intente nuevamente.")
 
 def iniciar_sesion_cliente(usuarios):
-    usuario = input("Ingrese su usuario: ")
-    clave = input("Ingrese su contraseña: ")
+    usuario = validar_vacio("Ingrese su usuario: ")
+    clave = validar_vacio("Ingrese su contraseña: ")
     login_exitoso = False
 
     for u in usuarios:
-        if u["usuario"] == usuario and u["clave"] == clave:
+        if u["usuario"] == usuario.strip() and u["clave"] == clave.strip():
             print(f"\nBienvenido, {u['nombres']}.")
             menu_turismo_cliente() 
             login_exitoso = True
             break
     if not login_exitoso:
         print("Usuario o contraseña incorrectos. Intente nuevamente o regístrese.")
-
 
 def menu_principal():
     archivo = "usuarios.txt"
@@ -353,3 +391,4 @@ def menu_principal():
             break
 
 menu_principal()
+
