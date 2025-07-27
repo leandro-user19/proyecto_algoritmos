@@ -561,8 +561,6 @@ def cargar_grafo_zonas(archivo):
         print(f"Error al cargar el grafo de zonas: {e}. Se retornará un grafo vacío.")
         return {}
 
-# --- Funcionalidades Principales ---
-
 def mostrar_mapa_lugares_conectados(grafo):
     """
     Muestra un mapa de los lugares turísticos conectados, mostrando cada conexión una sola vez.
@@ -790,6 +788,7 @@ def listar_itinerario_y_costo(ruta_cliente, grafo):
     itinerario_ordenado = bubble_sort(ruta_cliente[:]) # Copia para no modificar la original
 
     costo_total_itinerario = 0.0
+    distancia_total_itinerario = 0.0
     ruta_detallada_con_costos = []
 
     print("\nItinerario (orden alfabético):")
@@ -802,11 +801,12 @@ def listar_itinerario_y_costo(ruta_cliente, grafo):
         for i in range(len(itinerario_ordenado) - 1):
             origen = itinerario_ordenado[i]
             destino = itinerario_ordenado[i+1]
-            ruta, costo_tramo = dijkstra(grafo, origen, destino)
+            ruta, costo_tramo, distancia_tramo = dijkstra(grafo, origen, destino)
 
             if ruta:
                 costo_total_itinerario += costo_tramo
-                ruta_detallada_con_costos.append(f"  {origen} -> {destino} (Costo: ${costo_tramo:.2f})")
+                distancia_total_itinerario += distancia_tramo
+                ruta_detallada_con_costos.append(f"  {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
                 # print(f"  Ruta {origen} -> {destino}: {' -> '.join(ruta)} (Costo: ${costo_tramo:.2f})")
             else:
                 print(f"  Advertencia: No se encontró ruta directa entre {origen} y {destino}.")
@@ -816,7 +816,7 @@ def listar_itinerario_y_costo(ruta_cliente, grafo):
         for tramo in ruta_detallada_con_costos:
             print(tramo)
 
-        print(f"\nCosto total estimado del itinerario: ${costo_total_itinerario:.2f}")
+        print(f"\nCosto total estimado del itinerario: ${costo_total_itinerario:.2f} (Distancia total: {distancia_total_itinerario:.2f} km)")
     elif len(itinerario_ordenado) == 1:
         print("\nSolo hay un punto en el itinerario. Para calcular un costo, necesitas al menos dos puntos para una ruta.")
     
@@ -973,7 +973,7 @@ def menu_turismo_cliente(nombre_cliente):
         print("2. Consultar ruta óptima entre dos puntos")
         print("3. Explorar lugares por zona/ciudad")
         print("4. Seleccionar puntos a visitar")
-        print("5. Listar itinerario y costo")
+        print("5. Lista de tus lugares turísticos seleccionados con costo total y distancia total")
         print("6. Actualizar o Eliminar selección de lugares turísticos")
         print("7. Volver al menú principal")
 
@@ -1063,4 +1063,3 @@ def menu_principal():
             break
 
 menu_principal()
-
