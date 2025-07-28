@@ -807,7 +807,6 @@ def listar_itinerario_y_costo(ruta_cliente, grafo):
                 costo_total_itinerario += costo_tramo
                 distancia_total_itinerario += distancia_tramo
                 ruta_detallada_con_costos.append(f"  {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
-                # print(f"  Ruta {origen} -> {destino}: {' -> '.join(ruta)} (Costo: ${costo_tramo:.2f})")
             else:
                 print(f"  Advertencia: No se encontró ruta directa entre {origen} y {destino}.")
                 # Podrías añadir un costo penalidad o avisar al usuario
@@ -925,13 +924,6 @@ def guardar_ruta_cliente(nombre_cliente, ruta_cliente, costo_total):
             for i, punto in enumerate(ruta_cliente):
                 file.write(f"{i+1}. {punto}\n")
             file.write(f"\nCosto total estimado del itinerario: ${costo_total:.2f}\n")
-            # Podrías añadir la ruta detallada si lo deseas:
-            # for i in range(len(ruta_cliente) - 1):
-            #     origen = ruta_cliente[i]
-            #     destino = ruta_cliente[i+1]
-            #     ruta, costo_tramo = dijkstra(main_grafo, origen, destino) # Necesitas el grafo principal aquí
-            #     if ruta:
-            #         file.write(f"Ruta {origen} -> {destino}: {' -> '.join(ruta)} (Costo: ${costo_tramo:.2f})\n")
         print(f"Itinerario guardado exitosamente en '{nombre_archivo}'.")
     except Exception as e:
         print(f"\nError al guardar el itinerario: {e}")
@@ -991,7 +983,7 @@ def menu_turismo_cliente(nombre_cliente):
         elif opcion == '5':
             costo_total = listar_itinerario_y_costo(ruta_cliente_actual, grafo_conexiones)
             if costo_total is not None:
-                guardar_ruta_cliente(nombre_cliente, ruta_cliente_actual, costo_total) # Guardar automáticamente
+                guardar_ruta_cliente(nombre_cliente, ruta_cliente_actual, costo_total)
         elif opcion == '6':
             ruta_cliente_actual = actualizar_eliminar_seleccion(ruta_cliente_actual, grafo_conexiones)
             
