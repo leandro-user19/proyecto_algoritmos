@@ -205,7 +205,7 @@ def actualizar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_actualizar = int(input("Ingrese el número del punto turístico que desea actualizar: ")) - 1
-            if 0 <= indice_actualizar.strip() < len(puntos_turisticos):
+            if 0 <= indice_actualizar < len(puntos_turisticos):
                 ciudad = validar_vacio("Nueva ciudad: ")
                 lugar = validar_vacio("Nuevo lugar turístico: ")
                 while True:
@@ -218,10 +218,10 @@ def actualizar_punto_turistico(puntos_turisticos):
                     except ValueError:
                         print("\nERROR: Ingrese un número valido para la distancia y el costo.")
                 puntos_turisticos[indice_actualizar] = {
-                    "ciudad": ciudad.strip(),
-                    "lugar": lugar.strip(),
-                    "distancia": distancia.strip(),
-                    "costo": costo.strip()
+                    "ciudad": ciudad,
+                    "lugar": lugar,
+                    "distancia": distancia,
+                    "costo": costo
                 }
                 print(f"Punto turístico actualizado exitosamente.")
                 return
@@ -242,7 +242,7 @@ def eliminar_punto_turistico(puntos_turisticos):
     while True:
         try:
             indice_eliminar = int(input("Ingrese el número del punto turístico que desea eliminar: ")) - 1
-            if 0 <= indice_eliminar.strip() < len(puntos_turisticos):
+            if 0 <= indice_eliminar < len(puntos_turisticos):
                 punto_eliminado = puntos_turisticos.pop(indice_eliminar)
                 print(f"Punto turístico '{punto_eliminado['lugar']}' de {punto_eliminado['ciudad']} eliminado exitosamente.")
                 return
@@ -321,48 +321,54 @@ def menu_turismo_admin():
         else:
             print("Opción no válida.")
 
+def completar_grafo_con_nodos_destino(grafo):
+    destinos_faltantes = set()
+    for conexiones in grafo.values():
+        for destino in conexiones:
+            if destino not in grafo:
+                destinos_faltantes.add(destino)
+    for destino in destinos_faltantes:
+        grafo[destino] = {}
+
+
 #rol cliente
+import heapq
+
 def dijkstra(grafo, inicio, destino=None):
     distancias = {nodo: float('inf') for nodo in grafo}
     distancias[inicio] = 0
-    padres = {nodo: None for nodo in grafo}  
+    padres = {nodo: None for nodo in grafo}
+    costos = {nodo: 0 for nodo in grafo}  
     cola_prioridad = [(0, inicio)]
 
     while cola_prioridad:
         distancia_actual, nodo_actual = heapq.heappop(cola_prioridad)
+
         if distancia_actual > distancias[nodo_actual]:
             continue
         if destino and nodo_actual == destino:
             break
-        for vecino, distancia_vecino in grafo[nodo_actual].items():
+
+        for vecino, (distancia_vecino, costo_vecino) in grafo[nodo_actual].items():
             nueva_distancia = distancia_actual + distancia_vecino
             if nueva_distancia < distancias[vecino]:
                 distancias[vecino] = nueva_distancia
+                costos[vecino] = costos[nodo_actual] + costo_vecino 
                 padres[vecino] = nodo_actual
                 heapq.heappush(cola_prioridad, (nueva_distancia, vecino))
 
-    def reconstruir_camino(hasta_nodo):
-        camino = []
-        actual = hasta_nodo
-        while actual is not None:
-            camino.append(actual)
-            actual = padres[actual]
-        return camino[::-1]
-
+    
+    camino = []
     if destino:
-        if distancias[destino] == float('inf'):
-            return None, float('inf')
-        camino = reconstruir_camino(destino)
-        return camino, distancias[destino]
-    else:
-        todos_los_caminos = {}
-        for nodo in grafo:
-            if distancias[nodo] != float('inf'):
-                todos_los_caminos[nodo] = {
-                    'distancia': distancias[nodo],
-                    'camino': reconstruir_camino(nodo)
-                }
-        return todos_los_caminos
+        actual = destino
+        while actual:
+            camino.insert(0, actual)
+            actual = padres[actual]
+        if not camino or camino[0] != inicio:
+            camino = []
+
+    return camino, distancias.get(destino, float('inf')), costos.get(destino, 0)
+
 
 def bfs(grafo, inicio):
     visitados = []
@@ -512,6 +518,156 @@ def cargar_ruta_cliente(archivo):
     except Exception as e:
         return []
 
+#Explorar lugares: : organizados jerárquicamente por zonas. 
+
+def explorar_por_zonas(archivo="rutas.txt"):
+    try:
+        with open (archivo, "r", encoding="utf-8") as f:
+            print("\n---Lugares Turisticos Registrados Por ciudades--\n")
+            ciudad_actual=""
+            for linea in f:
+                linea=linea.strip()
+                if not linea:
+                    continue
+                if linea.endswith(":"):
+                    ciudad_actual=linea[:-1]
+                    print(f"Ciudad: {ciudad_actual}")
+                else:
+                    lugar, distancia, costo= linea.split("|")
+                    print(f" ·Lugar: {lugar}, ·Distancia: {distancia}km, ·Costo: ${float(costo):.2f}")
+    except FileNotFoundError:
+        print("Error")
+
+
+
+def seleccionar_puntos_a_visitar(puntos_turisticos):
+    if len (puntos_turisticos)<2:
+        print("Debe estar registrado al menos 2 puntos turisticos")
+        return
+    
+    print("\n--Lista de puntos turisticos Disponibles--")
+    for i, punto in enumerate(puntos_turisticos):
+        print(f"{i+1}. Ciudad: {punto["ciudad"]}  |  Lugar: {punto["lugar"]}  |  Distancia: {punto["distancia"]} km  |  Costo: ${punto["costo"]:.2f}")
+
+        seleccionados =[]
+        while len(seleccionados)<2:
+            try:
+                seleccion=int(input(f"Ingrese el número del punto turistico ·{len(seleccionados)+1} que desea visitar"))
+                if 1<=seleccion<=len(puntos_turisticos):
+                    punto=puntos_turisticos[seleccion-1]
+                    if punto not in seleccionados:
+                        seleccionados.append(punto)
+                    else:
+                        print("Punto ya seleccionado")
+                else:
+                    print("Numero invalido")
+            except ValueError:
+                print("Error. Ingrese un número")
+
+    # permitir que el usuario ingrese mas punto si lo desea
+    while True:
+        respuesta=input("¿Desea agregar otro punto turistico? (s/n): ").lower()
+        if respuesta=="s":
+            try:
+                seleccion=int(input("Ingrese el número del punto turistico: "))
+                if 1<=seleccion<=len(puntos_turisticos):
+                    punto=puntos_turisticos[seleccion-1]
+                    if punto not in seleccionados:
+                        seleccionados.append(punto)
+                    else:
+                        print("Punto ya seleccionado anteriormente")
+                else:
+                    print("Número invalido")
+            except ValueError:
+                print("Error. Ingrese un número")
+        elif respuesta=="n":
+            break
+        else:
+            print("\nError. Respuesta inválida ingrese 's' o 'n': ")
+
+    print("\n--Puntos turisticos seleccionados--")
+    for p in seleccionados:
+        print(f"Ciudad: {p["ciudad"]}  |  Lugar: {p["lugar"]}  |  Distancia: {p["distancia"]}km  |  Costo: ${p["costo"]:.2f}")
+
+def actualizar_rutas_cliente(puntos_cliente):
+    if not puntos_cliente:
+        print("No hay rutas cargadas.")
+        return
+
+    for id, datos in puntos_cliente.items():
+        print(f"{id}. {datos['ciudad']} - {datos['lugar']} ({datos['distancia']} km, ${datos['costo']})\n")
+    
+    try:
+        opcion = int(input("Elija el punto turístico a actualizar: "))
+        if opcion in puntos_cliente:
+            print("Ingrese los nuevos datos:")
+            ciudad = input("Nueva ciudad: ")
+            lugar = input("Nuevo lugar: ")
+            distancia = int(input("Nueva distancia (km): "))
+            costo = float(input("Nuevo costo ($): "))
+
+            puntos_cliente[opcion] = {
+                "ciudad": ciudad,
+                "lugar": lugar,
+                "distancia": distancia,
+                "costo": costo
+            }
+
+            print("Punto turístico actualizado en tu selección.")
+        else:
+            print("No existe ese punto en tu selección.")
+    except ValueError:
+        print("Debes ingresar un número válido.")
+
+def eliminar_rutas_cliente(puntos_cliente):
+    if not puntos_cliente:
+        print("No hay rutas para eliminar.")
+        return
+
+    for id, datos in puntos_cliente.items():
+        print(f"{id}. {datos['ciudad']} - {datos['lugar']} ({datos['distancia']} km, ${datos['costo']})\n")
+
+    try:
+        opcion = int(input("Elija el punto turístico a eliminar: "))
+        if opcion in puntos_cliente:
+            confirmacion = input("¿Seguro que deseas eliminar este punto? (si/no): ").lower()
+            if confirmacion == "si":
+                puntos_cliente.pop(opcion)
+                print("Punto eliminado de tu selección.")
+            else:
+                print("Cancelado.")
+        else:
+            print("No se encontró el punto.")
+    except ValueError:
+        print("Ingrese un número válido.")
+
+
+def guardar_seleccion_cliente(puntos_cliente, nombre_cliente):
+    nombre_archivo = f"rutas-{nombre_cliente}.txt"
+    with open(nombre_archivo, "w") as archivo:
+        for id, datos in puntos_cliente.items():
+            linea = f"{id};{datos['ciudad']};{datos['lugar']};{datos['distancia']};{datos['costo']}\n"
+            archivo.write(linea)
+    print(f"Selección guardada exitosamente en '{nombre_archivo}'")
+
+def cargar_rutas_para_cliente():
+    puntos = {}
+    try:
+        with open("rutas.txt", "r") as archivo:
+            for i, linea in enumerate(archivo, start=1):
+                partes = linea.strip().split(";")
+                if len(partes) == 5:
+                    ciudad, lugar, distancia, costo = partes[1], partes[2], int(partes[3]), float(partes[4])
+                    puntos[i] = {
+                        "ciudad": ciudad,
+                        "lugar": lugar,
+                        "distancia": distancia,
+                        "costo": costo
+                    }
+    except FileNotFoundError:
+        print("El archivo rutas.txt no existe.")
+    return puntos
+
 def menu_turismo_cliente(nombre_usuario):
     grafo = cargar_grafo("rutas.txt")
     archivo_cliente = f"{nombre_usuario}_ruta.txt"
@@ -532,17 +688,18 @@ def menu_turismo_cliente(nombre_usuario):
         if opcion == "1":
             mostrar_rutas_conectadas(grafo)
         elif opcion == "2":
+            completar_grafo_con_nodos_destino(grafo)
             consultar_ruta_optima(grafo)
         elif opcion == "3":
-            pass
+            explorar_por_zonas(archivo="rutas.txt")
         elif opcion == "4":
-            pass
+            seleccionar_puntos_a_visitar(puntos_turisticos)
         elif opcion == "5":
             listar_ruta_cliente(ruta_cliente)
         elif opcion == "6":
-            pass
+            actualizar_rutas_cliente(ruta_cliente)
         elif opcion == "7":
-            pass
+            eliminar_punto_turistico(ruta_cliente)
         elif opcion == "8":
             print("\nVolviendo al menú de inicio de sesión...")
             break
