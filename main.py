@@ -18,19 +18,14 @@ def usuario_validar(usuario):
     parte=usuario.split("@")
     if len(parte)!=2:
         return False
-    
     usuario,dominio=parte
-
     nombre_usuario=usuario.split(".")  #para el formato nombre.apellido del usuario
     if len(nombre_usuario)!=2:
         return False
-    
     if not usuario_valido(nombre_usuario[0]) or not usuario_valido(nombre_usuario[1]):
         return False
-    
     if "." not in dominio:   #valida que el dominio despues del @ contenga un punto
         return False
-    
     return True
 
 def usuario_valido(nombre):
