@@ -242,33 +242,22 @@ def listar_rutas_conectadas(rutas_conectadas):
     if not rutas_conectadas:
         print("\nAun no hay rutas conectadas.")
         return
-
     while True:
         print("\n--- Elija como desea ordenar las rutas conectadas ---")
         print("1. Por distancia (menor a mayor)")
         print("2. Por costo (menor a mayor)")
         opcion = input("Seleccione una opción: ")
-
-        # Crear una lista para almacenar solo las rutas "ida"
         rutas_solo_ida = []
         rutas_ya_vistas = set() # Usamos un conjunto para almacenar las claves de las rutas ya vistas
-
         for ruta in rutas_conectadas:
-            # Creamos una clave única para identificar el par bidireccional
-            # Aseguramos que "Origen-Destino" y "Destino-Origen" generen la misma clave
             key = tuple(sorted((ruta['origen'], ruta['destino'])))
-
-            # Si esta clave no ha sido vista, la agregamos a rutas_solo_ida
             if key not in rutas_ya_vistas:
                 rutas_solo_ida.append(ruta)
                 rutas_ya_vistas.add(key)
-
         if not rutas_solo_ida:
             print("No hay rutas únicas para mostrar.")
             return
-
         rutas_conectadas_ordenadas = list(rutas_solo_ida) # Ahora ordenamos solo las rutas "ida"
-
         if opcion == "1":
             rutas_conectadas_ordenadas = bubble_sort(rutas_conectadas_ordenadas, key=lambda x: x['distancia'])
         elif opcion == "2":
@@ -276,7 +265,6 @@ def listar_rutas_conectadas(rutas_conectadas):
         else:
             print("Opción no válida. Por favor, intente nuevamente.")
             continue
-
         print("\n--- Rutas Conectadas ---")
         for i, ruta in enumerate(rutas_conectadas_ordenadas):
             print(f"{i + 1}. De {ruta['origen']} a {ruta['destino']} | Distancia: {ruta['distancia']:.2f} km | Costo: ${ruta['costo']:.2f}")
@@ -299,18 +287,14 @@ def actualizar_datos_turisticos(puntos_turisticos, rutas_conectadas):
     print("1. Actualizar Punto Turístico")
     print("2. Actualizar Ruta Conectada")
     print("3. Volver al menú principal")
-
     opcion = validar_numero("Seleccione una opción: ", int)
-
     if opcion == 1:
         if not puntos_turisticos:
             print("\nNo hay puntos turísticos para actualizar.")
             return
-
         print("\n--- Actualizar Punto Turístico ---")
         for i, punto in enumerate(puntos_turisticos):
             print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar turístico: {punto['lugar']}")
-
         while True:
             try:
                 indice = int(input("Ingrese el número del punto turístico a actualizar: ")) - 1
@@ -319,12 +303,9 @@ def actualizar_datos_turisticos(puntos_turisticos, rutas_conectadas):
                     antiguo_lugar = punto_a_actualizar['lugar']
                     nueva_ciudad = validar_vacio("Nueva Ciudad: ")
                     nuevo_lugar = validar_vacio("Nuevo Lugar turístico: ")
-
                     punto_a_actualizar['ciudad'] = nueva_ciudad
                     punto_a_actualizar['lugar'] = nuevo_lugar
                     print("\nPunto turístico actualizado correctamente.")
-
-                    # Actualizar rutas conectadas si la ciudad o lugar cambiaron
                     for ruta in rutas_conectadas:
                         if ruta['origen'] == antiguo_lugar:
                             ruta['origen'] = nuevo_lugar
@@ -336,50 +317,35 @@ def actualizar_datos_turisticos(puntos_turisticos, rutas_conectadas):
                     print("Índice inválido. Por favor, intente de nuevo.")
             except ValueError:
                 print("Entrada inválida. Por favor, ingrese un número válido.")
-
     elif opcion == 2:
         if not rutas_conectadas:
             print("\nNo hay rutas conectadas para actualizar.")
             return
-
         print("\n--- Actualizar Ruta Conectada ---")
-        # Mostrar solo una de las rutas bidireccionales
         rutas_unicas_mostradas = []
         indices_originales = []
         for i, ruta in enumerate(rutas_conectadas):
-            # Crea una clave única para identificar el par bidireccional
-            # Asegura que "Origen-Destino" y "Destino-Origen" generen la misma clave
             key = tuple(sorted((ruta['origen'], ruta['destino'])))
-            
-            # Solo si esta clave no ha sido mostrada, la agregamos
             if key not in [tuple(sorted((r['origen'], r['destino']))) for r in rutas_unicas_mostradas]:
                 rutas_unicas_mostradas.append(ruta)
                 indices_originales.append(i) # Guardamos el índice original para futuras referencias
-
         if not rutas_unicas_mostradas:
             print("No hay rutas únicas para mostrar.")
             return
-
         for i, ruta_unica in enumerate(rutas_unicas_mostradas):
             print(f"{i + 1}. Origen: {ruta_unica['origen']} | Destino: {ruta_unica['destino']} | Distancia: {ruta_unica['distancia']} km | Costo: ${ruta_unica['costo']}")
-
         while True:
             try:
                 seleccion_unica = int(input("Ingrese el número de la ruta a actualizar: ")) - 1
                 if 0 <= seleccion_unica < len(rutas_unicas_mostradas):
-                    # Obtenemos la ruta seleccionada de las rutas únicas mostradas
                     ruta_seleccionada_unica = rutas_unicas_mostradas[seleccion_unica]
-                    
                     nueva_distancia = validar_numero("Nueva Distancia: ", float)
                     nuevo_costo = validar_numero("Nuevo Costo: ", float)
-
-                    # Actualizar ambas rutas (ida y vuelta) que corresponden a la seleccionada
                     for ruta in rutas_conectadas:
                         if (ruta['origen'] == ruta_seleccionada_unica['origen'] and ruta['destino'] == ruta_seleccionada_unica['destino']) or \
                            (ruta['origen'] == ruta_seleccionada_unica['destino'] and ruta['destino'] == ruta_seleccionada_unica['origen']):
                             ruta['distancia'] = nueva_distancia
                             ruta['costo'] = nuevo_costo
-                    
                     print("\nRuta conectada (ida y vuelta) actualizada correctamente.")
                     break
                 else:
@@ -395,18 +361,14 @@ def eliminar_datos_turisticos(puntos_turisticos, rutas_conectadas):
     print("\n--- Eliminar Datos ---")
     print("1. Eliminar Punto Turístico")
     print("2. Volver al menú principal")
-
     opcion = validar_numero("Seleccione una opción: ", int)
-
     if opcion == 1:
         if not puntos_turisticos:
             print("\nNo hay puntos turísticos para eliminar.")
             return
-
         print("\n--- Eliminar Punto Turístico ---")
         for i, punto in enumerate(puntos_turisticos):
             print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar turístico: {punto['lugar']}")
-
         while True:
             try:
                 indice = int(input("Ingrese el número del punto turístico a eliminar: ")) - 1
@@ -414,8 +376,6 @@ def eliminar_datos_turisticos(puntos_turisticos, rutas_conectadas):
                     punto_eliminado = puntos_turisticos.pop(indice)
                     lugar_eliminado = punto_eliminado['lugar']
                     print(f"\nLugar turístico '{lugar_eliminado}' eliminado correctamente.")
-
-                    # Eliminar rutas conectadas que contengan el lugar turístico eliminado
                     rutas_a_mantener = []
                     rutas_eliminadas_count = 0
                     for ruta in rutas_conectadas:
@@ -423,9 +383,7 @@ def eliminar_datos_turisticos(puntos_turisticos, rutas_conectadas):
                             rutas_eliminadas_count += 1
                         else:
                             rutas_a_mantener.append(ruta)
-                    
                     rutas_conectadas[:] = rutas_a_mantener # Actualiza la lista original
-                    
                     if rutas_eliminadas_count > 0:
                         print(f"Se eliminaron {rutas_eliminadas_count} rutas conectadas que incluían '{lugar_eliminado}'.")
                     else:
@@ -528,31 +486,6 @@ def cargar_grafo_conexiones(archivo):
         return {}
     except Exception as e:
         print(f"Error al cargar el grafo: {e}. Se retornará un grafo vacío.")
-        return {}
-
-def cargar_grafo_zonas(archivo):
-    grafo_zonas = {}
-    try:
-        with open(archivo, "r", encoding="utf-8") as file:
-            for linea in file:
-                linea = linea.strip()
-                if not linea:  # Salta líneas vacías
-                    continue
-                partes = linea.split(",")
-                if len(partes) < 2: # Asegura que haya al menos una zona y un lugar
-                    print(f"Advertencia: Línea ignorada por formato incorrecto: '{linea}'")
-                    continue
-                zona = partes[0].strip() # Limpia espacios alrededor del nombre de la ciudad
-                lugar = partes[1].strip() # Limpia espacios alrededor del nombre del lugar
-                if zona not in grafo_zonas:
-                    grafo_zonas[zona] = [] # Si la ciudad no existe, crea una nueva lista para sus lugares
-                grafo_zonas[zona].append(lugar) # Agrega el lugar a la lista de la ciudad
-        return grafo_zonas
-    except FileNotFoundError:
-        print(f"El archivo '{archivo}' no fue encontrado. Se retornará un grafo vacío.")
-        return {}
-    except Exception as e:
-        print(f"Error al cargar el grafo de zonas: {e}. Se retornará un grafo vacío.")
         return {}
 
 #mapa de distancia entre lugares turisticos basa en matriz
@@ -926,7 +859,6 @@ def menu_turismo_cliente(nombre_cliente):
     archivo_conexiones = "rutas_conectadas.txt"
     archivo_zonas = "puntos_turisticos.txt"
     grafo_conexiones = cargar_grafo_conexiones(archivo_conexiones)
-    grafo_zonas = cargar_grafo_zonas(archivo_zonas)
     ruta_cliente_actual = []
     while True:
         print(f"\n--- Menú Cliente ---")
@@ -946,7 +878,7 @@ def menu_turismo_cliente(nombre_cliente):
         elif opcion == '3':
             consultar_ruta_optima(grafo_conexiones)
         elif opcion == '4':
-            punto_padre = construir_arbol_desde_archivo(grafo_zonas)
+            punto_padre = construir_arbol_desde_archivo(archivo_zonas)
             if punto_padre:
                 menu_ciudades(punto_padre)
         elif opcion == '5':
