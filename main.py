@@ -591,22 +591,6 @@ def consultar_ruta_optima(grafo):
     print("-----------------------------")
 
 #Creo el arbol jerarquico que listara ciudades con sus respectivos puntos turisticos
-class NodoZona:   
-    def __init__(self, ciudad, punto):
-        self.ciudad = ciudad
-        self.punto = punto
-        self.izq = None
-        self.der = None
-
-def insertar(raiz, ciudad, punto):
-    if raiz is None:
-        return NodoZona(ciudad, punto)
-    if ciudad.lower() < raiz.ciudad.lower():
-        raiz.izq = insertar(raiz.izq, ciudad, punto)
-    else:
-        raiz.der = insertar(raiz.der, ciudad, punto)
-    return raiz
-
 def inorden(nodo):
     if nodo is not None:
         inorden(nodo.izq)
