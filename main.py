@@ -640,22 +640,22 @@ def menu_ciudades(raiz):
     except ValueError:
         print("Entrada invalida")
 
-def seleccionar_puntos_visita(grafo, ruta_cliente_actual):
+def seleccionar_puntos_visita(grafo, ruta_cliente):
     print("\n--- Seleccionar Lugares Turísticos a Visitar para tu Itinerario ---")
     puntos_disponibles = bubble_sort(list(grafo.keys()))
     if not puntos_disponibles:
         print("No hay lugares turísticos disponibles en el mapa para seleccionar.")
-        return ruta_cliente_actual # Retorna la lista sin cambios
+        return
     print("Lugares Turísticos disponibles:")
     for i, punto in enumerate(puntos_disponibles):
         print(f"{i+1}. {punto}")
     print("\nIngrese los lugares que desea visitar (ingrese 'fin' para terminar).")
     print("Mínimo dos lugares.")
-    nueva_ruta_cliente = ruta_cliente_actual[:] # Copia para no modificar la original directamente
+    puntos_seleccionados_para_nuevo_itinerario = []
     while True:
-        punto_str = input("Ingrese un punto turístico: ").strip()
+        punto_str = validar_vacio("Ingrese un punto turístico: ")
         if punto_str.lower() == 'fin':
-            if len(nueva_ruta_cliente) < 2:
+            if len(puntos_seleccionados_para_nuevo_itinerario) < 2:
                 print("Debe seleccionar al menos dos puntos turísticos.")
             else:
                 break
@@ -668,159 +668,216 @@ def seleccionar_puntos_visita(grafo, ruta_cliente_actual):
             if punto_str in puntos_disponibles:
                 punto_seleccionado = punto_str
         if punto_seleccionado:
-            if punto_seleccionado not in nueva_ruta_cliente:
-                nueva_ruta_cliente.append(punto_seleccionado)
-                print(f"'{punto_seleccionado}' añadido. Itinerario actual: {', '.join(nueva_ruta_cliente)}")
+            if punto_seleccionado not in puntos_seleccionados_para_nuevo_itinerario:
+                puntos_seleccionados_para_nuevo_itinerario.append(punto_seleccionado)
+                print(f"'{punto_seleccionado}' añadido. Itinerario actual: {', '.join(puntos_seleccionados_para_nuevo_itinerario)}")
             else:
                 print(f"'{punto_seleccionado}' ya está en tu itinerario.")
         else:
             print(f"'{punto_str}' no es un punto válido. Por favor, elija de la lista.")
-    print("\nSelección de puntos finalizada.")
+    if puntos_seleccionados_para_nuevo_itinerario:
+        nuevo_itinerario = {
+            "puntos_visita": puntos_seleccionados_para_nuevo_itinerario,
+            "costo_total": 0.0,
+            "distancia_total": 0.0
+        }
+        ruta_cliente.append(nuevo_itinerario)
+        print("\nSelección de puntos finalizada y guardada en el itinerario.")
+    else:
+        print("\nNo se seleccionaron puntos para un nuevo itinerario.")
     print("-------------------------------------------------------------------")
-    return nueva_ruta_cliente
 
-def listar_itinerario_y_costo(ruta_cliente, grafo):
+def listar_itinerario(ruta_cliente, grafo):
     if not ruta_cliente:
-        print("\nSu itinerario está vacío. Por favor, seleccione puntos primero.")
+        print("\nNo hay itinerarios guardados para listar.")
         return
-    print("\n--- Tu Itinerario Seleccionado ---")
-    itinerario_ordenado = bubble_sort(ruta_cliente[:]) # Copia para no modificar la original
-    costo_total_itinerario = 0.0
-    distancia_total_itinerario = 0.0
-    ruta_detallada_con_costos = []
-    print("\nItinerario (orden alfabético):")
-    for i, punto in enumerate(itinerario_ordenado):
-        print(f"{i+1}. {punto}")
-    if len(itinerario_ordenado) >= 2:
-        print("\nCalculando costo de ruta sugerida:")
-        for i in range(len(itinerario_ordenado) - 1):
-            origen = itinerario_ordenado[i]
-            destino = itinerario_ordenado[i+1]
-            ruta, costo_tramo, distancia_tramo = dijkstra(grafo, origen, destino)
-            if ruta:
-                costo_total_itinerario += costo_tramo
-                distancia_total_itinerario += distancia_tramo
-                ruta_detallada_con_costos.append(f"  {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
-            else:
-                print(f"  Advertencia: No se encontró ruta directa entre {origen} y {destino}.")
-        print("\nResumen de costos por tramo:")
-        for tramo in ruta_detallada_con_costos:
-            print(tramo)
-        print(f"\nCosto total estimado del itinerario: ${costo_total_itinerario:.2f} (Distancia total: {distancia_total_itinerario:.2f} km)")
-    elif len(itinerario_ordenado) == 1:
-        print("\nSolo hay un punto en el itinerario. Para calcular un costo, necesitas al menos dos puntos para una ruta.")
-    print("----------------------------------")
-    return costo_total_itinerario # Retornar el costo para guardarlo
+    print("\n--- Tus Itinerarios Guardados ---")
+    for idx, itinerario in enumerate(ruta_cliente):
+        print(f"\nItinerario #{idx + 1}:")
+        puntos = itinerario["puntos_visita"]
+        if not puntos:
+            print("  Este itinerario no tiene puntos seleccionados.")
+            continue
+        itinerario_ordenado = bubble_sort(puntos[:])  # Copia para no modificar la original
+        costo_total_itinerario = 0.0
+        distancia_total_itinerario = 0.0
+        ruta_detallada_con_costos = []
+        print("  Puntos en este itinerario (orden alfabético):")
+        for i, punto in enumerate(itinerario_ordenado):
+            print(f"    {i+1}. {punto}")
+        if len(itinerario_ordenado) >= 2:
+            print("\n  Calculando costo y distancia de ruta sugerida:")
+            for i in range(len(itinerario_ordenado) - 1):
+                origen = itinerario_ordenado[i]
+                destino = itinerario_ordenado[i+1]
+                ruta_tramo, costo_tramo, distancia_tramo = dijkstra(grafo, origen, destino)
+                if ruta_tramo:
+                    costo_total_itinerario += costo_tramo
+                    distancia_total_itinerario += distancia_tramo
+                    ruta_detallada_con_costos.append(f"    {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
+                else:
+                    print(f"    Advertencia: No se encontró ruta directa entre {origen} y {destino}.")
+            print("\n  Resumen por tramo:")
+            for tramo in ruta_detallada_con_costos:
+                print(tramo)
+            itinerario["costo_total"] = costo_total_itinerario
+            itinerario["distancia_total"] = distancia_total_itinerario
+            print(f"\n  Costo total: ${itinerario['costo_total']:.2f} | Distancia total: {itinerario['distancia_total']:.2f} km")
+        elif len(itinerario_ordenado) == 1:
+            print("\n  Solo hay un punto en el itinerario. Necesitas al menos dos puntos para una ruta.")
+        print("----------------------------------")
 
 def actualizar_eliminar_seleccion(ruta_cliente, grafo):
     if not ruta_cliente:
         print("\nSu itinerario está vacío. No hay nada que actualizar.")
-        return []
-    print("\n--- Actualizar Itinerario ---")
-    print("Itinerario actual:", ", ".join(ruta_cliente))
-    while True:
-        print("\nOpciones de actualización:")
-        print("1. Añadir un punto")
-        print("2. Eliminar un punto")
-        print("0. Terminar actualización")
-        opcion = input("Ingrese su opción: ").strip()
-        if opcion == '1':
-            puntos_disponibles = bubble_sort(list(grafo.keys()))
-            print("\nLugares turísticos disponibles para añadir:")
-            for i, punto in enumerate(puntos_disponibles):
-                if punto not in ruta_cliente:
-                    print(f"{i+1}. {punto}")
-            punto_a_anadir = input("Ingrese el nombre o número del punto a añadir: ").strip()
-            punto_validado = None
-            try:
-                idx = int(punto_a_anadir) - 1
-                if 0 <= idx < len(puntos_disponibles):
-                    punto_validado = puntos_disponibles[idx]
-            except ValueError:
-                if punto_a_anadir in puntos_disponibles:
-                    punto_validado = punto_a_anadir
-            if punto_validado:
-                if punto_validado not in ruta_cliente:
-                    ruta_cliente.append(punto_validado)
-                    print(f"'{punto_validado}' ha sido añadido.")
-                else:
-                    print(f"'{punto_validado}' ya está en el itinerario.")
-            else:
-                print("Punto no válido o no disponible.")
-        elif opcion == '2':
-            if not ruta_cliente:
-                print("El itinerario está vacío para eliminar.")
-                continue
-            print("\nLugares turísticos en su itinerario para eliminar:")
-            for i, punto in enumerate(ruta_cliente):
-                print(f"{i+1}. {punto}")
-            punto_a_eliminar_str = input("Ingrese el nombre o número del punto a eliminar: ").strip()
-            punto_a_eliminar = None
-            try:
-                idx = int(punto_a_eliminar_str) - 1
-                if 0 <= idx < len(ruta_cliente):
-                    punto_a_eliminar = ruta_cliente[idx]
-            except ValueError:
-                punto_a_eliminar = punto_a_eliminar_str
-            if punto_a_eliminar in ruta_cliente:
-                if len(ruta_cliente) > 2: # Mantener el requisito de mínimo 2 puntos
-                    ruta_cliente.remove(punto_a_eliminar)
-                    print(f"'{punto_a_eliminar}' ha sido eliminado.")
-                else:
-                    print("No puedes eliminar este punto. Debes mantener al menos dos puntos en tu itinerario.")
-            else:
-                print("Punto no encontrado en tu itinerario.")
-        elif opcion == '0':
-            print("Actualización de itinerario finalizada.")
-            break
-        else:
-            print("Opción inválida. Intente de nuevo.")
-        print("Itinerario actual:", ", ".join(ruta_cliente))
-    print("---------------------------\n")
-    return ruta_cliente
-
-def guardar_ruta_cliente(nombre_cliente, ruta_cliente, costo_total):
-    if not ruta_cliente:
-        print("\nNo hay itinerario para guardar.")
         return
-    nombre_archivo = f"rutas-{nombre_cliente.replace(' ', '_').lower()}.txt"
+    print("\n--- Actualizar Itinerario ---")
+    if not ruta_cliente:
+        print("No hay itinerarios para actualizar.")
+        return
+    while True:
+        print("\nItinerarios disponibles:")
+        for i, itinerario in enumerate(ruta_cliente):
+            print(f"{i+1}. Puntos: {', '.join(itinerario['puntos_visita'])}")
+        try:
+            opcion_itinerario_str = input("Seleccione el número de itinerario a actualizar (0 para terminar): ").strip()
+            if opcion_itinerario_str == '0':
+                break
+            opcion_itinerario_idx = int(opcion_itinerario_str) - 1
+            if not (0 <= opcion_itinerario_idx < len(ruta_cliente)):
+                print("Número de itinerario inválido. Intente de nuevo.")
+                continue
+            itinerario_a_modificar = ruta_cliente[opcion_itinerario_idx]
+            puntos_actuales = itinerario_a_modificar["puntos_visita"]
+            print(f"\nEditando Itinerario #{opcion_itinerario_idx + 1}. Puntos actuales: {', '.join(puntos_actuales)}")
+            while True:
+                print("Opciones de actualización para este itinerario:")
+                print("1. Añadir un punto")
+                print("2. Eliminar un punto")
+                print("0. Terminar edición de este itinerario")
+                opcion = input("Ingrese su opción: ").strip()
+                if opcion == '1':
+                    puntos_disponibles_mapa = bubble_sort(list(grafo.keys()))
+                    puntos_para_anadir = [p for p in puntos_disponibles_mapa if p not in puntos_actuales]
+                    if not puntos_para_anadir:
+                        print("\nNo hay más puntos turísticos disponibles para añadir a este itinerario.")
+                        continue 
+                    print("\nLugares turísticos disponibles para añadir:")
+                    for i, punto in enumerate(puntos_para_anadir): # Ahora itera sobre los puntos_para_anadir
+                        print(f"{i+1}. {punto}")
+                    punto_a_anadir = validar_vacio("Ingrese el nombre o número del punto a añadir: ")
+                    punto_validado = None
+                    try:
+                        idx = int(punto_a_anadir) - 1
+                        if 0 <= idx < len(puntos_para_anadir): # Cambiado a puntos_para_anadir
+                            punto_validado = puntos_para_anadir[idx]
+                    except ValueError:
+                        if punto_a_anadir in puntos_para_anadir: # Cambiado a puntos_para_anadir
+                            punto_validado = punto_a_anadir
+                    if punto_validado:
+                        if punto_validado not in puntos_actuales: 
+                            puntos_actuales.append(punto_validado)
+                            print(f"'{punto_validado}' ha sido añadido.")
+                        else:
+                            print(f"'{punto_validado}' ya está en el itinerario (esto no debería ocurrir si la lista de disponibles se filtra correctamente).")
+                    else:
+                        print("Punto no válido o no disponible para añadir.")
+                elif opcion == '2':
+                    if not puntos_actuales:
+                        print("El itinerario está vacío para eliminar.")
+                        continue
+                    if len(puntos_actuales) <= 2:
+                        print("No puedes eliminar un punto. Debes mantener al menos dos puntos en tu itinerario.")
+                        continue
+                    print("\nLugares turísticos en su itinerario para eliminar:")
+                    for i, punto in enumerate(puntos_actuales):
+                        print(f"{i+1}. {punto}")
+                    punto_a_eliminar_str = validar_vacio("Ingrese el nombre o número del punto a eliminar: ")
+                    punto_a_eliminar = None
+                    try:
+                        idx = int(punto_a_eliminar_str) - 1
+                        if 0 <= idx < len(puntos_actuales):
+                            punto_a_eliminar = puntos_actuales[idx]
+                    except ValueError:
+                        punto_a_eliminar = punto_a_eliminar_str
+                    if punto_a_eliminar in puntos_actuales:
+                        if len(puntos_actuales) > 2: 
+                            puntos_actuales.remove(punto_a_eliminar)
+                            print(f"'{punto_a_eliminar}' ha sido eliminado.")
+                        else:
+                            print("\nNo puedes eliminar este punto. Debes mantener al menos dos puntos en tu itinerario.")
+                    else:
+                        print("Punto no encontrado en tu itinerario.")
+                elif opcion == '0':
+                    print("Edición de itinerario finalizada.")
+                    break
+                else:
+                    print("Opción inválida. Intente de nuevo.")
+                print("Itinerario actual para este cliente:", ", ".join(puntos_actuales))
+        except ValueError:
+            print("Entrada inválida. Por favor, ingrese un número.")
+    print("---------------------------")
+
+def guardar_ruta_cliente(archivo, ruta_cliente):
+    if not ruta_cliente:
+        print("\nNo hay itinerarios para guardar.")
+        return
     try:
-        with open(nombre_archivo, "w", encoding="utf-8") as file:
-            file.write(f"Itinerario de: {nombre_cliente}\n")
-            file.write("--------------------------------\n")
-            file.write("Puntos seleccionados:\n")
-            for i, punto in enumerate(ruta_cliente):
-                file.write(f"{i+1}. {punto}\n")
-            file.write(f"\nCosto total estimado del itinerario: ${costo_total:.2f}\n")
-        print(f"Itinerario guardado exitosamente en '{nombre_archivo}'.")
+        with open(archivo, "w", encoding="utf-8") as file:
+            for idx, itinerario in enumerate(ruta_cliente):
+                puntos_str = ", ".join(itinerario["puntos_visita"])
+                file.write(f"Itinerario {idx+1}: {puntos_str}, Costo Total: {itinerario['costo_total']:.2f}, Distancia Total: {itinerario['distancia_total']:.2f}\n")
+        print(f"Itinerarios guardados exitosamente en '{archivo}'.")
     except Exception as e:
-        print(f"\nError al guardar el itinerario: {e}")
+        print(f"\nError al guardar los itinerarios: {e}")
     print("-------------------------------------------")
 
 def cargar_rutas_cliente(archivo):
-    rutas = []
+    rutas_cargadas = [] # Inicializa una lista vacía para almacenar las rutas
     try:
         with open(archivo, "r", encoding="utf-8") as file:
             for linea in file:
                 linea = linea.strip()
                 if linea:
-                    partes = linea.split(",")
-                    nombre_cliente = partes[0].strip()
-                    ruta = [p.strip() for p in partes[1:]]
-                    rutas.append({"nombre": nombre_cliente, "ruta": ruta})
-        return rutas
+                    try:
+                        partes = linea.split(", Costo Total: ")
+                        puntos_parte_bruta = partes[0].replace("Itinerario ", "")
+                        if ": " in puntos_parte_bruta:
+                            puntos_str_limpio = puntos_parte_bruta.split(": ", 1)[1].strip()
+                        else:
+                            print(f"Advertencia: Formato de línea inesperado en el archivo: {linea}. Saltando esta línea.")
+                            continue
+                        puntos_visita = [p.strip() for p in puntos_str_limpio.split(", ")]
+                        if len(partes) > 1 and ", Distancia Total: " in partes[1]:
+                            costo_distancia_parte = partes[1].split(", Distancia Total: ")
+                            costo_total = float(costo_distancia_parte[0])
+                            distancia_total = float(costo_distancia_parte[1])
+                        else:
+                            print(f"Advertencia: Formato de costo/distancia inesperado en la línea: {linea}. Usando 0.0.")
+                            costo_total = 0.0
+                            distancia_total = 0.0
+
+                        rutas_cargadas.append({
+                            "puntos_visita": puntos_visita,
+                            "costo_total": costo_total,
+                            "distancia_total": distancia_total
+                        })
+                    except Exception as parse_error:
+                        print(f"Error al parsear línea '{linea}': {parse_error}. Saltando esta línea.")
+        return rutas_cargadas # Siempre retorna la lista, vacía si no hay nada o hay errores.
     except FileNotFoundError:
-        print(f"El archivo '{archivo}' no fue encontrado. Se retornará una lista vacía de rutas.")
-        return []
+        print(f"El archivo '{archivo}' no fue encontrado. Se iniciará con una lista vacía de itinerarios.")
+        return [] # Retorna una lista vacía si el archivo no existe
     except Exception as e:
-        print(f"Error al cargar las rutas desde '{archivo}': {e}. Se retornará una lista vacía.")
-        return []
-    
+        print(f"Error general al cargar los itinerarios desde '{archivo}': {e}. Se iniciará con una lista vacía.")
+        return [] 
+
 def menu_turismo_cliente(nombre_cliente):
     archivo_conexiones = "rutas_conectadas.txt"
     archivo_zonas = "puntos_turisticos.txt"
     grafo_conexiones = cargar_grafo_conexiones(archivo_conexiones)
-    ruta_cliente_actual = []
+    cliente_archivo = f"rutas-{nombre_cliente.replace(' ', '_').lower()}.txt"
+    ruta_cliente = cargar_rutas_cliente(cliente_archivo)
     while True:
         print(f"\n--- Menú Cliente ---")
         print("1. Mostrar mapa de distancias entre lugares turísticos")  # NUEVA OPCIÓN
@@ -843,13 +900,14 @@ def menu_turismo_cliente(nombre_cliente):
             if punto_padre:
                 menu_ciudades(punto_padre)
         elif opcion == '5':
-            ruta_cliente_actual = seleccionar_puntos_visita(grafo_conexiones, ruta_cliente_actual)
+            seleccionar_puntos_visita(grafo_conexiones,ruta_cliente)
+            guardar_ruta_cliente(cliente_archivo,ruta_cliente)
         elif opcion == '6':
-            costo_total = listar_itinerario_y_costo(ruta_cliente_actual, grafo_conexiones)
-            if costo_total is not None:
-                guardar_ruta_cliente(nombre_cliente, ruta_cliente_actual, costo_total)
+            listar_itinerario(ruta_cliente,grafo_conexiones)
+            guardar_ruta_cliente(cliente_archivo,ruta_cliente)
         elif opcion == '7':
-            ruta_cliente_actual = actualizar_eliminar_seleccion(ruta_cliente_actual, grafo_conexiones)
+            actualizar_eliminar_seleccion(ruta_cliente,grafo_conexiones)
+            guardar_ruta_cliente(cliente_archivo,ruta_cliente)
         elif opcion == '8':
             print("\nVolviendo al menú principal...")
             break
