@@ -1,3 +1,6 @@
+
+import respaldo3
+
 def consultar_ruta_conectada(rutas_conectadas):
     if not rutas_conectadas:
         print("\nAun no hay rutas conectadas.")
