@@ -64,7 +64,6 @@ def registrar_usuario(usuarios):
     print("\n--Registro de Usuario--")
     nombres = validar_vacio("Ingrese su nombre y apellido: ")
     edad = validar_numero("Ingrese su edad: ", int)
-
     while True:
         usuario = validar_vacio("Ingrese su usuario: ")
         if usuario_validar(usuario):
@@ -78,14 +77,12 @@ def registrar_usuario(usuarios):
                 break
         else:
             print("Error. El formato debe de ser nombre.apellido@dominio.com")
-
     while True:
         clave = validar_vacio("Ingrese su contraseña: ")
         if contraseña_segura(clave):
             break
         else:
             print("Error de contraseña. Debe tener al menos 6 caracteres, una mayúscula, una minúscula y un número.")
-    
     usuarios.append({
         "nombres": nombres,
         "edad": edad,
@@ -143,30 +140,22 @@ def conectar_puntos_turisticos(puntos_turisticos,rutas_conectadas):
     if not puntos_turisticos:
         print("\nAun no hay datos agregados")
         return
-
     print("\n--- Conectar Puntos Turísticos ---")
     print("Seleccione dos puntos turísticos para conectar:")
-    
     for i, punto in enumerate(puntos_turisticos):
         print(f"{i + 1}. Ciudad: {punto['ciudad']} | Lugar turístico: {punto['lugar']}")
-    
     while True:
         try:
             indice1 = int(input("Ingrese el número del primer punto turístico (origen): ")) - 1
             indice2 = int(input("Ingrese el número del segundo punto turístico (destino): ")) - 1
-
             if not (0 <= indice1 < len(puntos_turisticos) and 0 <= indice2 < len(puntos_turisticos)):
                 print("Índices inválidos. Por favor, intente de nuevo.")
                 continue
-
             if indice1 == indice2:
                 print("No se puede conectar un punto turístico consigo mismo. Intente de nuevo.")
                 continue
-
             origen = puntos_turisticos[indice1]
             destino = puntos_turisticos[indice2]
-
-            # Verificar si la ruta ya existe en alguna dirección
             ruta_existente = False
             for r in rutas_conectadas:
                 if (r['origen'] == origen['lugar'] and r['destino'] == destino['lugar']) or \
@@ -174,14 +163,10 @@ def conectar_puntos_turisticos(puntos_turisticos,rutas_conectadas):
                     print(f"La conexión entre {origen['lugar']} y {destino['lugar']} ya existe.")
                     ruta_existente = True
                     break
-            
             if ruta_existente:
                 break # Salir del bucle si la ruta ya existe
-
             distancia = validar_numero(f"Ingrese la distancia entre {origen['lugar']} y {destino['lugar']} (en km): ", float)
             costo = validar_numero(f"Ingrese el costo del viaje entre {origen['lugar']} y {destino['lugar']} (en USD): ", float)
-
-            # Agrega la ruta de origen a destino
             ruta_ida = {
                 "origen": origen['lugar'],
                 "destino": destino['lugar'],
@@ -190,8 +175,6 @@ def conectar_puntos_turisticos(puntos_turisticos,rutas_conectadas):
             }
             rutas_conectadas.append(ruta_ida)
             print(f"\nConexión creada: {origen['lugar']} <-> {destino['lugar']}")
-
-            # Agrega la ruta de destino a origen (bidireccionalidad)
             ruta_vuelta = {
                 "origen": destino['lugar'],
                 "destino": origen['lugar'],
@@ -502,7 +485,6 @@ def mostrar_mapa_lugares_conectados(grafo):
     print("-----------------------------")
 
 def mostrar_mapa_distancias(rutas_conectadas):
-    #se construye la raiz
     if not rutas_conectadas:
         print("No hay rutas conectadas para mostrar el mapa de distancias.")
         return
@@ -618,7 +600,7 @@ def insertar_ciudad(raiz, ciudad, punto):
     else:
         raiz.agregar_punto(punto)
     return raiz
-    
+
 def construir_arbol_desde_archivo(archivo):
     raiz = None
     try:
@@ -630,6 +612,7 @@ def construir_arbol_desde_archivo(archivo):
         return raiz
     except Exception as f:
         print(f"Error al intentar leer el archivo {f}")
+
 def listar_ciudad_inorden(nodo, lista):
     if nodo:
         listar_ciudad_inorden(nodo.izq, lista)
@@ -705,7 +688,6 @@ def listar_itinerario_y_costo(ruta_cliente, grafo):
     costo_total_itinerario = 0.0
     distancia_total_itinerario = 0.0
     ruta_detallada_con_costos = []
-
     print("\nItinerario (orden alfabético):")
     for i, punto in enumerate(itinerario_ordenado):
         print(f"{i+1}. {punto}")
