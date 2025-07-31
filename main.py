@@ -765,7 +765,7 @@ def actualizar_eliminar_seleccion(ruta_cliente, grafo):
                     print("\nLugares turísticos disponibles para añadir:")
                     for i, punto in enumerate(puntos_para_anadir): # Ahora itera sobre los puntos_para_anadir
                         print(f"{i+1}. {punto}")
-                    punto_a_anadir = validar_vacio("Ingrese el nombre o número del punto a añadir: ")
+                    punto_a_anadir = input("Ingrese el nombre o número del punto a añadir: ").strip()
                     punto_validado = None
                     try:
                         idx = int(punto_a_anadir) - 1
@@ -792,7 +792,7 @@ def actualizar_eliminar_seleccion(ruta_cliente, grafo):
                     print("\nLugares turísticos en su itinerario para eliminar:")
                     for i, punto in enumerate(puntos_actuales):
                         print(f"{i+1}. {punto}")
-                    punto_a_eliminar_str = validar_vacio("Ingrese el nombre o número del punto a eliminar: ")
+                    punto_a_eliminar_str = input("Ingrese el nombre o número del punto a eliminar: ").strip()
                     punto_a_eliminar = None
                     try:
                         idx = int(punto_a_eliminar_str) - 1
