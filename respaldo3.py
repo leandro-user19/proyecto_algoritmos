@@ -701,7 +701,7 @@ def listar_itinerario(ruta_cliente, grafo):
         itinerario_ordenado = bubble_sort(puntos[:])  # Copia para no modificar la original
         costo_total_itinerario = 0.0
         distancia_total_itinerario = 0.0
-        ruta_detallada_con_costos = []
+        ruta_detallada = []
         print("  Puntos en este itinerario (orden alfabético):")
         for i, punto in enumerate(itinerario_ordenado):
             print(f"    {i+1}. {punto}")
@@ -714,11 +714,11 @@ def listar_itinerario(ruta_cliente, grafo):
                 if ruta_tramo:
                     costo_total_itinerario += costo_tramo
                     distancia_total_itinerario += distancia_tramo
-                    ruta_detallada_con_costos.append(f"    {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
+                    ruta_detallada.append(f"    {origen} -> {destino} (Costo: ${costo_tramo:.2f}) (Distancia: {distancia_tramo:.2f} km)")
                 else:
                     print(f"    Advertencia: No se encontró ruta directa entre {origen} y {destino}.")
             print("\n  Resumen por tramo:")
-            for tramo in ruta_detallada_con_costos:
+            for tramo in ruta_detallada:
                 print(tramo)
             itinerario["costo_total"] = costo_total_itinerario
             itinerario["distancia_total"] = distancia_total_itinerario
