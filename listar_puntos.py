@@ -1,13 +1,6 @@
 
-import respaldo3
-
-def bubble_sort(arr, key = lambda x: x):
-    n = len(arr)
-    for i in range(n):
-        for j in range(0, n - i - 1):
-            if key(arr[j]) > key(arr[j + 1]):
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr
+from respaldo3 import dijkstra
+from respaldo3 import bubble_sort
 
 def listar_itinerario(ruta_cliente, grafo):
     if not ruta_cliente:

@@ -1,12 +1,5 @@
 
-import respaldo3
-
-def validar_vacio(mensaje):
-    while True:
-        texto = input(mensaje)
-        if texto.strip():
-            return texto.strip()
-        print("El campo no puede estar vacío. Por favor, ingrese un texto.")
+from respaldo3 import validar_vacio
 
 def consultar_ruta_conectada(rutas_conectadas):
     if not rutas_conectadas:
