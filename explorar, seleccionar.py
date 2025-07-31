@@ -25,7 +25,7 @@ def seleccionar_puntos_a_visitar(puntos_turisticos):
         print("Debe estar registrado al menos 2 puntos turisticos")
         return
     
-    print("\n--Lista de puntos turisticos Disponibles--")
+    print("\n--Lista de puntos turísticos Disponibles--")
     for i, punto in enumerate(puntos_turisticos):
         print(f"{i+1}. Ciudad: {punto["ciudad"]}  |  Lugar: {punto["lugar"]}  |  Distancia: {punto["distancia"]} km  |  Costo: ${punto["costo"]:.2f}")
 
