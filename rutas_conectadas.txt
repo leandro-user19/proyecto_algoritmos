@@ -1,0 +1,14 @@
+Casa Patrimonial Hacienda Tilipulo,Panecillo,86.60,2.00
+Panecillo,Casa Patrimonial Hacienda Tilipulo,86.60,2.00
+Malecón Simón Bolívar,Parque Calderon,196.00,4.25
+Parque Calderon,Malecón Simón Bolívar,196.00,4.25
+Parque Naútico Ignacio Flores,Parque Calderon,359.00,5.25
+Parque Calderon,Parque Naútico Ignacio Flores,359.00,5.25
+Centro Historico,Parque Seminario,416.00,8.50
+Parque Seminario,Centro Historico,416.00,8.50
+Mitad del Mundo,Malecon del Salado,437.00,8.50
+Malecon del Salado,Mitad del Mundo,437.00,8.50
+Molinos Monserrat,Plaza de las Flores,440.00,5.25
+Plaza de las Flores,Molinos Monserrat,440.00,5.25
+Teleferico,Parque Nacional Cajas,485.00,6.00
+Parque Nacional Cajas,Teleferico,485.00,6.00

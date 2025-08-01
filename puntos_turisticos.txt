@@ -1,0 +1,13 @@
+Latacunga,Molinos Monserrat
+Latacunga,Parque Naútico Ignacio Flores
+Latacunga,Casa Patrimonial Hacienda Tilipulo
+Quito,Panecillo
+Quito,Mitad del Mundo
+Quito,Teleferico
+Quito,Centro Historico
+Cuenca,Plaza de las Flores
+Cuenca,Parque Calderon
+Cuenca,Parque Nacional Cajas
+Guayaquil,Malecon del Salado
+Guayaquil,Parque Seminario
+Guayaquil,Malecón Simón Bolívar
